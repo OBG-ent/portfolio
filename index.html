@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reynold Obago — Build In Public Portfolio</title>
+<meta name="description" content="Reynold Obago ships a coding project every day. 24 projects, live demos, all open source.">
+<style>
+:root{
+  --black:#0a0a0a; --ink:#111; --card:#161616; --line:#2a2a2a;
+  --gold:#d4af37; --gold-soft:#f0d878; --gold-dim:#8a7223;
+  --text:#f2f2f2; --muted:#a8a8a8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--black);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.55}
+a{color:var(--gold)}
+.hero{max-width:1080px;margin:0 auto;padding:56px 20px 36px;text-align:center}
+.hero img{width:150px;height:150px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);box-shadow:0 0 32px rgba(212,175,55,.35)}
+.hero h1{font-size:2.4rem;margin:18px 0 6px;letter-spacing:.5px}
+.hero h1 span{color:var(--gold)}
+.tagline{color:var(--muted);max-width:560px;margin:0 auto 20px}
+.social{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.social a{display:inline-block;padding:9px 20px;border:1px solid var(--gold);border-radius:999px;color:var(--gold-soft);text-decoration:none;font-weight:600;font-size:.92rem;transition:.2s}
+.social a:hover{background:var(--gold);color:#111}
+.stats{max-width:1080px;margin:0 auto;padding:0 20px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;text-align:center}
+.stat b{display:block;font-size:1.8rem;color:var(--gold)}
+.stat span{font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.controls{max-width:1080px;margin:26px auto 0;padding:0 20px}
+#search{width:100%;padding:13px 16px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--text);font-size:1rem;outline:none}
+#search:focus{border-color:var(--gold)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 4px}
+.chip{padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--muted);font-size:.82rem;cursor:pointer;user-select:none;transition:.15s}
+.chip:hover{border-color:var(--gold-dim);color:var(--text)}
+.chip.on{background:var(--gold);border-color:var(--gold);color:#111;font-weight:700}
+.chip-group-label{width:100%;font-size:.75rem;color:var(--gold-dim);text-transform:uppercase;letter-spacing:1.5px;margin-top:6px}
+.grid{max-width:1080px;margin:22px auto 60px;padding:0 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;transition:.2s}
+.card:hover{border-color:var(--gold-dim);transform:translateY(-2px)}
+.day{display:inline-block;align-self:flex-start;font-size:.72rem;font-weight:800;letter-spacing:1.5px;color:#111;background:var(--gold);border-radius:6px;padding:3px 10px;margin-bottom:10px;text-transform:uppercase}
+.card h3{font-size:1.15rem;margin-bottom:6px}
+.card p.desc{color:var(--muted);font-size:.93rem;margin-bottom:10px}
+.tech{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tech span{font-size:.72rem;background:#222;border:1px solid var(--line);color:var(--gold-soft);border-radius:6px;padding:2px 9px}
+.highlight{font-size:.85rem;color:var(--text);border-left:3px solid var(--gold);padding:6px 10px;margin-bottom:12px;background:rgba(212,175,55,.06);border-radius:0 8px 8px 0}
+.highlight b{color:var(--gold)}
+.card-links{display:flex;gap:10px;margin-top:auto;align-items:center}
+.gh{color:var(--gold);font-weight:600;font-size:.9rem;text-decoration:none}
+.gh:hover{text-decoration:underline}
+.demo-toggle{margin-left:auto;background:none;border:1px solid var(--gold-dim);color:var(--gold-soft);border-radius:8px;padding:7px 14px;font-size:.85rem;cursor:pointer;font-weight:600}
+.demo-toggle:hover{background:rgba(212,175,55,.12)}
+.demo-box{display:none;margin-top:14px;border-top:1px solid var(--line);padding-top:14px}
+.demo-box.open{display:block}
+.demo-box button,.demo-box input,.demo-box select,.demo-box textarea{font-family:inherit}
+.dbtn{background:var(--gold);color:#111;border:none;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer;font-size:.88rem;margin:4px 6px 4px 0}
+.dbtn:hover{background:var(--gold-soft)}
+.dbtn.ghost{background:none;border:1px solid var(--gold-dim);color:var(--gold-soft)}
+.din{background:#0d0d0d;border:1px solid var(--line);color:var(--text);border-radius:8px;padding:8px 10px;font-size:.9rem;margin:4px 6px 4px 0;max-width:100%}
+.demo-box label{font-size:.82rem;color:var(--muted);display:block;margin:8px 0 2px}
+.demo-out{margin-top:10px;font-size:.92rem}
+canvas.dcanvas{background:#0d0d0d;border:1px solid var(--line);border-radius:8px;display:block;margin:8px auto;touch-action:none;max-width:100%}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.kv{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px dashed #2c2c2c;font-size:.9rem}
+.swatch{height:44px;border-radius:8px;cursor:pointer;flex:1;min-width:60px;display:flex;align-items:flex-end;justify-content:center;font-size:.68rem;color:#00000088;padding-bottom:3px;font-weight:700}
+footer{text-align:center;color:var(--muted);font-size:.85rem;padding:34px 20px;border-top:1px solid var(--line)}
+footer a{color:var(--gold)}
+#nores{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 0;display:none}
+@media(max-width:640px){.hero h1{font-size:1.8rem}.stats{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <img src="photo.jpg" alt="Reynold Obago">
+  <h1>Reynold <span>Obago</span></h1>
+  <p class="tagline">Toronto-based logistics &amp; operations professional shipping a coding project every day.</p>
+  <div class="social">
+    <a href="https://github.com/OBG-ent" target="_blank" rel="noopener">GitHub</a>
+    <a href="https://x.com/Reynoldobago" target="_blank" rel="noopener">X / Twitter</a>
+    <a href="https://www.linkedin.com/in/reynold-obago-98a642105/" target="_blank" rel="noopener">LinkedIn</a>
+  </div>
+</header>
+
+<section class="stats" id="stats"></section>
+
+<div class="controls">
+  <input id="search" type="search" placeholder="Search projects… (e.g. game, timer, tracker)" aria-label="Search projects">
+  <div class="chips" id="techChips"></div>
+  <div class="chips" id="dayChips"></div>
+</div>
+
+<main class="grid" id="grid"></main>
+<div id="nores">No projects match your filters.</div>
+
+<footer>
+  Built in public, one project at a time — by <a href="https://github.com/OBG-ent" target="_blank" rel="noopener">Reynold Obago</a> · Toronto 🇨🇦
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+"use strict";
+/* ============================================================
+   EDIT BELOW TO ADD NEW PROJECTS — append new day entries here
+   {day, name, url, description, tech:[], highlight, demo}
+   ============================================================ */
+const PROJECTS = [
+{day:"Day 12",name:"quote-generator",url:"https://github.com/OBG-ent/day-12-quote-generator",description:"Random quote generator with categories, dark mode, and copy button.",tech:["HTML","CSS","JS"],highlight:"Shows UI polish and attention to detail — categories, theming, and clipboard UX in one tidy page.",demo:"quote"},
+{day:"Day 12",name:"pixel-art-maker",url:"https://github.com/OBG-ent/day-12-pixel-art-maker",description:"Pixel-art editor with flood fill, gallery, and PNG export.",tech:["JavaScript","Canvas"],highlight:"Canvas manipulation plus real file export — demonstrates working with binary output in the browser.",demo:"pixel"},
+{day:"Day 11",name:"bill-splitter",url:"https://github.com/OBG-ent/day-11-bill-splitter",description:"Splits restaurant bills proportionally with exact tax+tip math (leftover cent to biggest remainder).",tech:["Python","JS"],highlight:"The rounding logic is the real flex — parts always sum to the total exactly. Precision under constraints.",demo:"bill"},
+{day:"Day 11",name:"prompt-vault",url:"https://github.com/OBG-ent/day-11-prompt-vault",description:"Personal library for saving and organizing AI prompts.",tech:["JavaScript"],highlight:"A tool built for a real daily workflow — localStorage persistence and search.",demo:"vault"},
+{day:"Day 10",name:"dice-roller",url:"https://github.com/OBG-ent/day-10-dice-roller",description:"Dice roller with history.",tech:["JavaScript"],highlight:"Small, complete, shippable — the discipline of finishing daily.",demo:"dice"},
+{day:"Day 10",name:"breakout-game",url:"https://github.com/OBG-ent/day-10-breakout-game",description:"Playable Breakout arcade game.",tech:["JavaScript","Canvas"],highlight:"Game loop, collision detection, and state management on canvas.",demo:"breakout"},
+{day:"Day 9",name:"habit-tracker",url:"https://github.com/OBG-ent/day-09-habit-tracker",description:"Daily habit tracker with streaks.",tech:["JavaScript"],highlight:"Date-aware streak logic with local persistence — real-world state handling.",demo:"habit"},
+{day:"Day 9",name:"minesweeper-game",url:"https://github.com/OBG-ent/day-09-minesweeper-game",description:"Playable Minesweeper.",tech:["JavaScript"],highlight:"Flood-fill reveal algorithm and grid state — classic CS fundamentals, playable.",demo:"minesweeper"},
+{day:"Day 8",name:"color-palette-generator",url:"https://github.com/OBG-ent/day-08-color-palette-generator",description:"Generates harmonious color palettes.",tech:["JavaScript"],highlight:"Color theory translated into code — HSL math with one-click copy UX.",demo:"palette"},
+{day:"Day 8",name:"weather-dashboard",url:"https://github.com/OBG-ent/day-08-weather-dashboard",description:"Weather dashboard powered by the free Open-Meteo API — no key needed.",tech:["JavaScript","API"],highlight:"Third-party API integration with async fetch and error handling.",demo:"weather"},
+{day:"Day 7",name:"unit-converter",url:"https://github.com/OBG-ent/day-07-unit-converter",description:"Converts between common units.",tech:["JavaScript"],highlight:"Clean conversion logic across unit systems — practical utility thinking.",demo:"unit"},
+{day:"Day 7",name:"tetris-game",url:"https://github.com/OBG-ent/day-07-tetris-game",description:"Playable Tetris.",tech:["JavaScript","Canvas"],highlight:"Piece rotation, line clears, and gravity timing — a full game engine in one file.",demo:"tetris"},
+{day:"Day 6",name:"tip-calculator",url:"https://github.com/OBG-ent/day-06-tip-calculator",description:"Tip and bill calculator.",tech:["JavaScript"],highlight:"Solves an everyday annoyance — the kind of tool people actually bookmark.",demo:"tip"},
+{day:"Day 6",name:"2048-game",url:"https://github.com/OBG-ent/day-06-2048-game",description:"Playable 2048.",tech:["JavaScript"],highlight:"Slide-and-merge grid logic with game-over detection.",demo:"g2048"},
+{day:"Day 5",name:"countdown-timer",url:"https://github.com/OBG-ent/day-05-countdown-timer",description:"Countdown timer.",tech:["JavaScript"],highlight:"Timer state done right — pause, resume, and reset without drift.",demo:"countdown"},
+{day:"Day 5",name:"typing-speed-test",url:"https://github.com/OBG-ent/day-05-typing-speed-test",description:"Typing speed test with WPM.",tech:["JavaScript"],highlight:"Real-time input analysis — WPM and accuracy computed live.",demo:"typing"},
+{day:"Day 4",name:"pomodoro-timer",url:"https://github.com/OBG-ent/day-04-pomodoro-timer",description:"Pomodoro focus timer.",tech:["JavaScript"],highlight:"Work/break cycle state machine — productivity tooling built from scratch.",demo:"pomodoro"},
+{day:"Day 4",name:"wordle-clone",url:"https://github.com/OBG-ent/day-04-wordle-clone",description:"Playable Wordle clone.",tech:["JavaScript"],highlight:"Guess evaluation with duplicate-letter handling — trickier than it looks.",demo:"wordle"},
+{day:"Day 3",name:"qr-code-generator",url:"https://github.com/OBG-ent/day-03-qr-code-generator",description:"QR code generator.",tech:["JavaScript"],highlight:"Leverages a third-party library via CDN — knowing when not to reinvent.",demo:"qr"},
+{day:"Day 3",name:"memory-match-game",url:"https://github.com/OBG-ent/day-03-memory-match-game",description:"Memory match card game.",tech:["JavaScript"],highlight:"Shuffle, flip state, and match detection — DOM game logic.",demo:"memory"},
+{day:"Day 2",name:"password-generator",url:"https://github.com/OBG-ent/day-02-password-generator",description:"Secure password generator (Python CLI originally — browser adaptation here).",tech:["JavaScript"],highlight:"Crypto-grade randomness via the Web Crypto API — security-aware implementation.",demo:"password"},
+{day:"Day 2",name:"snake-game",url:"https://github.com/OBG-ent/day-02-snake-game",description:"Playable Snake.",tech:["JavaScript","Canvas"],highlight:"The classic — grid movement, growth, and collision in a tight loop.",demo:"snake"},
+{day:"Day 1",name:"todo-list-app",url:"https://github.com/OBG-ent/todo-list-app",description:"Todo list app.",tech:["JavaScript"],highlight:"Where the streak started — CRUD with localStorage on day one.",demo:"todo"},
+{day:"Bonus",name:"expense-tracker",url:"https://github.com/OBG-ent/expense-tracker",description:"Expense tracker (browser adaptation with localStorage).",tech:["JavaScript"],highlight:"Running totals and persistent records — personal finance utility.",demo:"expense"}
+];
+
+/* ---------- helpers ---------- */
+let __uid = 0;
+const uid = p => p + "-" + (++__uid);
+const el = (tag, html) => { const e = document.createElement(tag); if (html != null) e.innerHTML = html; return e; };
+const money = n => "$" + n.toFixed(2);
+function copyText(t, btn) {
+  const done = () => { if (btn) { const o = btn.textContent; btn.textContent = "Copied!"; setTimeout(() => btn.textContent = o, 1200); } };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(done).catch(done);
+  else { const ta = el("textarea"); ta.value = t; document.body.appendChild(ta); ta.select(); try { document.execCommand("copy"); } catch (e) {} ta.remove(); done(); }
+}
+
+/* ============================================================
+   DEMOS — one small render function per project, keyed by demo key
+   ============================================================ */
+const DEMOS = {
+
+/* --- Day 12: quote generator --- */
+quote(box) {
+  const QUOTES = [
+    ["The best way to predict the future is to invent it.", "Alan Kay", "Tech"],
+    ["Simplicity is the soul of efficiency.", "Austin Freeman", "Work"],
+    ["Don't watch the clock; do what it does. Keep going.", "Sam Levenson", "Motivation"],
+    ["Success is the sum of small efforts repeated daily.", "Robert Collier", "Motivation"],
+    ["The only way to do great work is to love what you do.", "Steve Jobs", "Work"],
+    ["Code is like humor. When you have to explain it, it's bad.", "Cory House", "Tech"],
+    ["First, solve the problem. Then, write the code.", "John Johnson", "Tech"],
+    ["Well begun is half done.", "Aristotle", "Motivation"],
+    ["Quality is not an act, it is a habit.", "Aristotle", "Work"],
+    ["Make it work, make it right, make it fast.", "Kent Beck", "Tech"]
+  ];
+  const cats = ["All", ...new Set(QUOTES.map(q => q[2]))];
+  const sel = el("select", cats.map(c => `<option>${c}</option>`).join(""));
+  sel.className = "din";
+  const out = el("div", ""), btn = el("button", "New quote"), tgl = el("button", "Dark: on"), cpy = el("button", "Copy");
+  btn.className = "dbtn"; tgl.className = "dbtn ghost"; cpy.className = "dbtn ghost";
+  let dark = true, cur = "";
+  const paint = () => { box.style.background = dark ? "#0d0d0d" : "#f5f0dc"; box.style.color = dark ? "#f2f2f2" : "#222"; box.style.borderRadius = "8px"; box.style.padding = "4px"; };
+  const show = () => {
+    const pool = QUOTES.filter(q => sel.value === "All" || q[2] === sel.value);
+    const q = pool[Math.floor(Math.random() * pool.length)];
+    cur = `"${q[0]}" — ${q[1]}`;
+    out.innerHTML = `<p style="font-size:1.05rem;margin:10px 0">“${q[0]}”</p><p style="color:var(--gold);font-size:.9rem">— ${q[1]} · ${q[2]}</p>`;
+  };
+  btn.onclick = show; tgl.onclick = () => { dark = !dark; tgl.textContent = "Dark: " + (dark ? "on" : "off"); paint(); };
+  cpy.onclick = () => copyText(cur, cpy);
+  box.append(el("div", ""), sel, btn, tgl, cpy, out);
+  paint(); show();
+},
+
+/* --- Day 12: pixel art maker --- */
+pixel(box) {
+  const N = 16, S = 16, cv = el("canvas"), ctx = cv.getContext("2d");
+  cv.width = N * S; cv.height = N * S; cv.className = "dcanvas"; cv.style.cursor = "crosshair";
+  ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, cv.width, cv.height);
+  const color = el("input"); color.type = "color"; color.value = "#d4af37"; color.className = "din";
+  const paint = e => {
+    const r = cv.getBoundingClientRect();
+    const x = Math.floor((e.clientX - r.left) / r.width * N), y = Math.floor((e.clientY - r.top) / r.height * N);
+    ctx.fillStyle = color.value; ctx.fillRect(x * S, y * S, S, S);
+  };
+  let down = false;
+  cv.onmousedown = e => { down = true; paint(e); };
+  cv.onmousemove = e => { if (down) paint(e); };
+  window.addEventListener("mouseup", () => down = false);
+  const fill = el("button", "Flood fill"), clear = el("button", "Clear"), exp = el("button", "Export PNG");
+  fill.className = "dbtn ghost"; clear.className = "dbtn ghost"; exp.className = "dbtn";
+  fill.onclick = () => { ctx.fillStyle = color.value; ctx.fillRect(0, 0, cv.width, cv.height); };
+  clear.onclick = () => { ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, cv.width, cv.height); };
+  exp.onclick = () => { const a = el("a"); a.download = "pixel-art.png"; a.href = cv.toDataURL("image/png"); a.click(); };
+  box.append(el("div", ""), color, fill, clear, exp, cv);
+},
+
+/* --- Day 11: bill splitter --- */
+bill(box) {
+  const mk = (lbl, val) => { const l = el("label", lbl); const i = el("input"); i.type = "number"; i.value = val; i.min = "0"; i.step = "0.01"; i.className = "din"; box.append(l, i); return i; };
+  const sub = mk("Subtotal ($)", "120"), tax = mk("Tax %", "13"), tip = mk("Tip %", "18"), n = mk("People", "4");
+  n.step = "1";
+  const go = el("button", "Split it"), out = el("div", "");
+  go.className = "dbtn";
+  go.onclick = () => {
+    const s = parseFloat(sub.value) || 0, tx = parseFloat(tax.value) || 0, tp = parseFloat(tip.value) || 0, ppl = Math.max(1, Math.round(parseFloat(n.value) || 1));
+    const taxAmt = s * tx / 100, tipAmt = s * tp / 100, total = s + taxAmt + tipAmt;
+    // proportional split with leftover cents to biggest fractional remainders
+    const raw = total / ppl;
+    const floors = new Array(ppl).fill(Math.floor(raw * 100) / 100);
+    let assigned = floors.reduce((a, b) => a + b, 0);
+    let cents = Math.round((total - assigned) * 100);
+    const rem = floors.map((f, i) => [raw * 100 - Math.floor(raw * 100), i]).sort((a, b) => b[0] - a[0]);
+    for (let k = 0; k < cents; k++) floors[rem[k % ppl][1]] += 0.01;
+    out.innerHTML = `<div class="kv"><span>Total (incl. tax + tip)</span><b>${money(total)}</b></div>` +
+      floors.map((f, i) => `<div class="kv"><span>Person ${i + 1}</span><span>${money(f)}</span></div>`).join("") +
+      `<p style="font-size:.8rem;color:var(--muted);margin-top:6px">Leftover cents went to the biggest fractional remainders — parts always sum to the total exactly.</p>`;
+  };
+  box.append(go, out); go.onclick();
+},
+
+/* --- Day 11: prompt vault --- */
+vault(box) {
+  const KEY = "pv_prompts_v1";
+  const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { return []; } };
+  const save = a => localStorage.setItem(KEY, JSON.stringify(a));
+  const title = el("input"), body = el("textarea"), q = el("input");
+  title.placeholder = "Prompt title…"; title.className = "din"; body.placeholder = "Prompt text…"; body.className = "din"; body.rows = 3;
+  q.placeholder = "Search vault…"; q.className = "din"; q.style.width = "100%";
+  const add = el("button", "Save prompt"), list = el("div", "");
+  add.className = "dbtn";
+  const render = () => {
+    const items = load().filter(p => (p.t + p.b).toLowerCase().includes(q.value.toLowerCase()));
+    list.innerHTML = "";
+    if (!items.length) list.innerHTML = `<p style="color:var(--muted);font-size:.88rem">Vault is empty — save your first prompt above.</p>`;
+    items.forEach(p => {
+      const d = el("div", `<b>${p.t.replace(/</g, "&lt;")}</b><p style="font-size:.85rem;color:var(--muted);white-space:pre-wrap">${p.b.replace(/</g, "&lt;").slice(0, 160)}${p.b.length > 160 ? "…" : ""}</p>`);
+      d.style.cssText = "border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:6px 0";
+      const cp = el("button", "Copy"), del = el("button", "Delete");
+      cp.className = "dbtn ghost"; del.className = "dbtn ghost";
+      cp.onclick = () => copyText(p.b, cp);
+      del.onclick = () => { save(load().filter(x => x.id !== p.id)); render(); };
+      d.append(cp, del); list.append(d);
+    });
+  };
+  add.onclick = () => {
+    if (!title.value.trim() && !body.value.trim()) return;
+    const a = load(); a.unshift({ id: Date.now(), t: title.value.trim() || "Untitled", b: body.value });
+    save(a); title.value = ""; body.value = ""; render();
+  };
+  q.oninput = render;
+  box.append(el("label", "New prompt"), title, body, add, el("label", "Your vault"), q, list);
+  render();
+},
+
+/* --- Day 10: dice roller --- */
+dice(box) {
+  const sel = el("select", [4, 6, 8, 10, 12, 20].map(s => `<option value="${s}">d${s}</option>`).join(""));
+  sel.className = "din"; sel.value = "6";
+  const roll = el("button", "Roll"), res = el("div", ""), hist = el("div", "");
+  roll.className = "dbtn";
+  const H = [];
+  roll.onclick = () => {
+    const v = 1 + Math.floor(Math.random() * parseInt(sel.value));
+    H.unshift(`d${sel.value}: ${v}`);
+    res.innerHTML = `<div style="font-size:3rem;color:var(--gold);font-weight:800">${v}</div>`;
+    hist.innerHTML = H.slice(0, 10).map(h => `<div class="kv"><span>${h}</span></div>`).join("");
+  };
+  box.append(el("div", ""), sel, roll, res, el("label", "History"), hist);
+  roll.onclick();
+},
+
+/* --- Day 10: breakout --- */
+breakout(box) {
+  const cv = el("canvas"), ctx = cv.getContext("2d");
+  cv.width = 420; cv.height = 300; cv.className = "dcanvas"; cv.tabIndex = 0;
+  let px = 180, bx = 210, by = 250, dx = 2.2, dy = -2.4, score = 0, lives = 3, over = false, won = false, raf;
+  const bricks = [];
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 7; c++) bricks.push({ x: 20 + c * 55, y: 30 + r * 24, on: true });
+  const keys = {};
+  cv.onkeydown = e => keys[e.key] = true; cv.onkeyup = e => keys[e.key] = false;
+  cv.onmousemove = e => { const r = cv.getBoundingClientRect(); px = (e.clientX - r.left) / r.width * cv.width - 35; };
+  const start = el("button", "Start"), msg = el("div", "");
+  start.className = "dbtn";
+  function frame() {
+    if (over || won) return;
+    if (keys["ArrowLeft"]) px -= 6; if (keys["ArrowRight"]) px += 6;
+    px = Math.max(0, Math.min(cv.width - 70, px));
+    bx += dx; by += dy;
+    if (bx < 6 || bx > cv.width - 6) dx *= -1;
+    if (by < 6) dy *= -1;
+    if (by > cv.height - 16 && bx > px && bx < px + 70) { dy = -Math.abs(dy); dx = ((bx - px - 35) / 35) * 3; }
+    bricks.forEach(b => {
+      if (b.on && bx > b.x && bx < b.x + 50 && by > b.y && by < b.y + 18) { b.on = false; dy *= -1; score += 10; }
+    });
+    if (by > cv.height) { lives--; if (lives <= 0) over = true; else { bx = 210; by = 250; dx = 2.2; dy = -2.4; } }
+    if (bricks.every(b => !b.on)) won = true;
+    ctx.fillStyle = "#0d0d0d"; ctx.fillRect(0, 0, cv.width, cv.height);
+    ctx.fillStyle = "#d4af37";
+    bricks.forEach(b => { if (b.on) ctx.fillRect(b.x, b.y, 50, 18); });
+    ctx.fillRect(px, cv.height - 12, 70, 10);
+    ctx.beginPath(); ctx.arc(bx, by, 6, 0, 7); ctx.fill();
+    ctx.fillStyle = "#f2f2f2"; ctx.font = "13px sans-serif";
+    ctx.fillText("Score " + score + "   Lives " + lives, 12, 18);
+    if (over) msg.innerHTML = `<b style="color:#e06060">Game over — score ${score}.</b>`;
+    if (won) msg.innerHTML = `<b style="color:var(--gold)">You cleared every brick! Score ${score}.</b>`;
+    raf = requestAnimationFrame(frame);
+  }
+  start.onclick = () => { cancelAnimationFrame(raf); px = 180; bx = 210; by = 250; dx = 2.2; dy = -2.4; score = 0; lives = 3; over = won = false; bricks.forEach(b => b.on = true); msg.innerHTML = ""; cv.focus(); frame(); };
+  box.append(el("p", "Move: mouse or ← → keys. Click Start, then click the game to focus keys."), start, cv, msg);
+},
+
+/* --- Day 9: habit tracker --- */
+habit(box) {
+  const KEY = "ht_habits_v1", today = new Date().toISOString().slice(0, 10);
+  const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { return []; } };
+  const save = a => localStorage.setItem(KEY, JSON.stringify(a));
+  const inp = el("input"), add = el("button", "Add habit"), list = el("div", "");
+  inp.placeholder = "e.g. Read 20 pages"; inp.className = "din"; add.className = "dbtn";
+  const streak = h => { let s = 0, d = new Date(); if (!h.days.includes(today)) d.setDate(d.getDate() - 1); while (h.days.includes(d.toISOString().slice(0, 10))) { s++; d.setDate(d.getDate() - 1); } return s; };
+  const render = () => {
+    list.innerHTML = "";
+    load().forEach(h => {
+      const done = h.days.includes(today);
+      const d = el("div", `<b>${h.n.replace(/</g, "&lt;")}</b> <span style="color:var(--gold)">🔥 ${streak(h)} day streak</span>`);
+      d.style.cssText = "border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:6px 0;display:flex;justify-content:space-between;align-items:center;gap:8px";
+      const t = el("button", done ? "Done ✓" : "Mark today"), del = el("button", "✕");
+      t.className = "dbtn" + (done ? " ghost" : ""); del.className = "dbtn ghost";
+      t.onclick = () => { const a = load(), x = a.find(y => y.id === h.id); if (!x.days.includes(today)) x.days.push(today); save(a); render(); };
+      del.onclick = () => { save(load().filter(y => y.id !== h.id)); render(); };
+      const r = el("div", ""); r.append(t, del); d.append(r); list.append(d);
+    });
+    if (!load().length) list.innerHTML = `<p style="color:var(--muted);font-size:.88rem">No habits yet — add your first above.</p>`;
+  };
+  add.onclick = () => { if (!inp.value.trim()) return; const a = load(); a.push({ id: Date.now(), n: inp.value.trim(), days: [] }); save(a); inp.value = ""; render(); };
+  box.append(el("div", ""), inp, add, list); render();
+},
+
+/* --- Day 9: minesweeper --- */
+minesweeper(box) {
+  const N = 9, M = 10, cv = el("canvas"), ctx = cv.getContext("2d"), S = 30;
+  cv.width = N * S; cv.height = N * S; cv.className = "dcanvas";
+  let grid, open, flags, dead, wonC;
+  const msg = el("div", ""), start = el("button", "New game");
+  start.className = "dbtn";
+  function setup() {
+    grid = Array.from({ length: N }, () => Array(N).fill(0));
+    open = Array.from({ length: N }, () => Array(N).fill(false));
+    flags = Array.from({ length: N }, () => Array(N).fill(false));
+    dead = false; wonC = 0; msg.innerHTML = "";
+    let placed = 0;
+    while (placed < M) { const x = Math.floor(Math.random() * N), y = Math.floor(Math.random() * N); if (grid[y][x] !== -1) { grid[y][x] = -1; placed++; } }
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+      if (grid[y][x] === -1) continue;
+      let c = 0;
+      for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const nx = x + dx, ny = y + dy; if (nx >= 0 && ny >= 0 && nx < N && ny < N && grid[ny][nx] === -1) c++; }
+      grid[y][x] = c;
+    }
+    draw();
+  }
+  function draw() {
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+      ctx.fillStyle = open[y][x] ? "#1c1c1c" : "#2e2e2e";
+      ctx.fillRect(x * S + 1, y * S + 1, S - 2, S - 2);
+      if (open[y][x] && grid[y][x] > 0) { ctx.fillStyle = "#d4af37"; ctx.font = "16px sans-serif"; ctx.textAlign = "center"; ctx.fillText(grid[y][x], x * S + S / 2, y * S + 21); }
+      if (open[y][x] && grid[y][x] === -1) { ctx.fillStyle = "#e06060"; ctx.beginPath(); ctx.arc(x * S + S / 2, y * S + S / 2, 8, 0, 7); ctx.fill(); }
+      if (!open[y][x] && flags[y][x]) { ctx.fillStyle = "#d4af37"; ctx.font = "16px sans-serif"; ctx.textAlign = "center"; ctx.fillText("⚑", x * S + S / 2, y * S + 21); }
+    }
+  }
+  function reveal(x, y) {
+    if (x < 0 || y < 0 || x >= N || y >= N || open[y][x] || flags[y][x]) return;
+    open[y][x] = true; wonC++;
+    if (grid[y][x] === 0) for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) reveal(x + dx, y + dy);
+  }
+  cv.oncontextmenu = e => e.preventDefault();
+  cv.onmousedown = e => {
+    if (dead) return;
+    const r = cv.getBoundingClientRect();
+    const x = Math.floor((e.clientX - r.left) / r.width * N), y = Math.floor((e.clientY - r.top) / r.height * N);
+    if (e.button === 2) { if (!open[y][x]) flags[y][x] = !flags[y][x]; }
+    else {
+      if (flags[y][x] || open[y][x]) return;
+      if (grid[y][x] === -1) { dead = true; for (let yy = 0; yy < N; yy++) for (let xx = 0; xx < N; xx++) if (grid[yy][xx] === -1) open[yy][xx] = true; msg.innerHTML = `<b style="color:#e06060">Boom! Game over.</b>`; }
+      else { reveal(x, y); if (wonC === N * N - M) { dead = true; msg.innerHTML = `<b style="color:var(--gold)">You cleared the field! 🎉</b>`; } }
+    }
+    draw();
+  };
+  start.onclick = setup;
+  box.append(el("p", "Left-click to reveal, right-click to flag. 10 mines hidden."), start, cv, msg);
+  setup();
+},
+
+/* --- Day 8: color palette generator --- */
+palette(box) {
+  const row = el("div", ""), go = el("button", "Generate");
+  row.className = "row"; row.style.marginTop = "10px"; go.className = "dbtn";
+  const hsl = (h, s, l) => { h = ((h % 360) + 360) % 360; s /= 100; l /= 100; const k = n => (n + h / 30) % 12, a = s * Math.min(l, 1 - l), f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1))); const t = x => Math.round(x * 255).toString(16).padStart(2, "0"); return "#" + t(f(0)) + t(f(8)) + t(f(4)); };
+  const gen = () => {
+    row.innerHTML = "";
+    const base = Math.floor(Math.random() * 360), mode = Math.floor(Math.random() * 3);
+    const hues = mode === 0 ? [0, 30, 60, 180, 210] : mode === 1 ? [0, 120, 240, 60, 300] : [0, 20, 40, 200, 220];
+    hues.forEach((off, i) => {
+      const hex = hsl(base + off, 65 + (i % 2) * 10, 45 + (i % 3) * 8);
+      const s = el("div", hex); s.className = "swatch"; s.style.background = hex;
+      s.onclick = () => copyText(hex, null);
+      s.title = "Click to copy"; row.append(s);
+    });
+  };
+  go.onclick = gen;
+  box.append(go, el("p", "Click any swatch to copy its hex."), row); gen();
+},
+
+/* --- Day 8: weather dashboard --- */
+weather(box) {
+  const CITIES = { "Toronto": [43.65, -79.38], "Nairobi": [-1.29, 36.82], "New York": [40.71, -74.0], "London": [51.5, -0.12], "Vancouver": [49.28, -123.12] };
+  const sel = el("select", Object.keys(CITIES).map(c => `<option>${c}</option>`).join(""));
+  sel.className = "din";
+  const go = el("button", "Get weather"), out = el("div", "");
+  go.className = "dbtn";
+  const WMO = { 0: "Clear sky", 1: "Mainly clear", 2: "Partly cloudy", 3: "Overcast", 45: "Fog", 48: "Icy fog", 51: "Light drizzle", 61: "Light rain", 63: "Rain", 65: "Heavy rain", 71: "Light snow", 73: "Snow", 75: "Heavy snow", 80: "Showers", 95: "Thunderstorm" };
+  go.onclick = async () => {
+    const [la, lo] = CITIES[sel.value];
+    out.innerHTML = `<p style="color:var(--muted)">Loading ${sel.value}…</p>`;
+    try {
+      const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${la}&longitude=${lo}&current=temperature_2m,weather_code,wind_speed_10m&timezone=auto`);
+      const j = await r.json(), c = j.current;
+      out.innerHTML = `<div style="font-size:2.4rem;color:var(--gold);font-weight:800">${Math.round(c.temperature_2m)}°C</div>
+        <div class="kv"><span>Condition</span><span>${WMO[c.weather_code] || "—"}</span></div>
+        <div class="kv"><span>Wind</span><span>${c.wind_speed_10m} km/h</span></div>
+        <div class="kv"><span>City</span><span>${sel.value}</span></div>
+        <p style="font-size:.78rem;color:var(--muted);margin-top:6px">Live data · Open-Meteo (no API key)</p>`;
+    } catch (e) { out.innerHTML = `<p style="color:#e06060">Could not reach the weather API — check your connection.</p>`; }
+  };
+  box.append(el("div", ""), sel, go, out); go.onclick();
+},
+
+/* --- Day 7: unit converter --- */
+unit(box) {
+  const UNITS = {
+    Length: { m: 1, km: 1000, mi: 1609.34, ft: 0.3048, "in": 0.0254, cm: 0.01 },
+    Weight: { kg: 1, g: 0.001, lb: 0.453592, oz: 0.0283495 },
+    Temperature: "temp"
+  };
+  const cat = el("select", Object.keys(UNITS).map(k => `<option>${k}</option>`).join(""));
+  cat.className = "din";
+  const from = el("select"), to = el("select"), val = el("input"), out = el("div", "");
+  from.className = to.className = "din"; val.className = "din"; val.type = "number"; val.value = "1";
+  const fill = () => {
+    const u = UNITS[cat.value] === "temp" ? ["°C", "°F", "K"] : Object.keys(UNITS[cat.value]);
+    from.innerHTML = to.innerHTML = u.map(x => `<option>${x}</option>`).join("");
+    to.selectedIndex = 1 % u.length; convert();
+  };
+  const convert = () => {
+    const v = parseFloat(val.value);
+    if (isNaN(v)) { out.innerHTML = ""; return; }
+    let r;
+    if (UNITS[cat.value] === "temp") {
+      const toC = { "°C": v, "°F": (v - 32) * 5 / 9, "K": v - 273.15 };
+      const c = toC[from.value];
+      r = { "°C": c, "°F": c * 9 / 5 + 32, "K": c + 273.15 }[to.value];
+    } else r = v * UNITS[cat.value][from.value] / UNITS[cat.value][to.value];
+    out.innerHTML = `<div style="font-size:1.4rem;color:var(--gold);font-weight:700;margin-top:8px">${v} ${from.value} = ${+r.toFixed(4)} ${to.value}</div>`;
+  };
+  cat.onchange = fill; from.onchange = to.onchange = convert; val.oninput = convert;
+  box.append(el("div", ""), cat, val, from, el("span", " → "), to, out); fill();
+},
+
+/* --- Day 6: tip calculator --- */
+tip(box) {
+  const mk = (lbl, v, step) => { const l = el("label", lbl); const i = el("input"); i.type = "number"; i.value = v; i.min = "0"; i.step = step || "1"; i.className = "din"; box.append(l, i); return i; };
+  const b = mk("Bill ($)", "60", "0.01"), t = mk("Tip %", "18"), p = mk("People", "2"); p.step = "1";
+  const out = el("div", "");
+  const calc = () => {
+    const bill = parseFloat(b.value) || 0, tp = parseFloat(t.value) || 0, ppl = Math.max(1, Math.round(parseFloat(p.value) || 1));
+    const tipAmt = bill * tp / 100, total = bill + tipAmt;
+    out.innerHTML = `<div class="kv"><span>Tip</span><span>${money(tipAmt)}</span></div><div class="kv"><span>Total</span><b>${money(total)}</b></div><div class="kv"><span>Each pays</span><b style="color:var(--gold)">${money(total / ppl)}</b></div>`;
+  };
+  [b, t, p].forEach(i => i.oninput = calc);
+  box.append(out); calc();
+},
+
+/* --- Day 7: tetris --- */
+tetris(box) {
+  const cv = el("canvas"), ctx = cv.getContext("2d"), C = 10, R = 20, S = 22;
+  cv.width = C * S; cv.height = R * S; cv.className = "dcanvas"; cv.tabIndex = 0;
+  const SHAPES = [[[1,1,1,1]], [[1,1],[1,1]], [[0,1,0],[1,1,1]], [[1,0,0],[1,1,1]], [[0,0,1],[1,1,1]], [[1,1,0],[0,1,1]], [[0,1,1],[1,1,0]]];
+  const COLS = ["#22d3ee", "#facc15", "#c084fc", "#fb923c", "#38bdf8", "#4ade80", "#f87171"];
+  let grid, cur, cx, cy, score, over, timer;
+  const msg = el("div", ""), start = el("button", "Start");
+  start.className = "dbtn";
+  const rot = m => m[0].map((_, i) => m.map(r => r[i]).reverse());
+  function spawn() {
+    const i = Math.floor(Math.random() * SHAPES.length);
+    cur = SHAPES[i].map(r => r.slice()); cx = 3; cy = 0; cur.c = COLS[i];
+    if (hit(cur, cx, cy)) { over = true; msg.innerHTML = `<b style="color:#e06060">Game over — score ${score}.</b>`; clearInterval(timer); }
+  }
+  const hit = (m, x, y) => m.some((r, j) => r.some((v, i) => v && (x + i < 0 || x + i >= C || y + j >= R || (y + j >= 0 && grid[y + j][x + i]))));
+  function lock() {
+    cur.forEach((r, j) => r.forEach((v, i) => { if (v && cy + j >= 0) grid[cy + j][cx + i] = cur.c; }));
+    for (let y = R - 1; y >= 0; y--) if (grid[y].every(Boolean)) { grid.splice(y, 1); grid.unshift(new Array(C).fill(0)); score += 100; y++; }
+  }
+  function draw() {
+    ctx.fillStyle = "#0d0d0d"; ctx.fillRect(0, 0, cv.width, cv.height);
+    grid.forEach((r, y) => r.forEach((c, x) => { if (c) { ctx.fillStyle = c; ctx.fillRect(x * S + 1, y * S + 1, S - 2, S - 2); } }));
+    if (cur) cur.forEach((r, j) => r.forEach((v, i) => { if (v && cy + j >= 0) { ctx.fillStyle = cur.c; ctx.fillRect((cx + i) * S + 1, (cy + j) * S + 1, S - 2, S - 2); } }));
+    ctx.fillStyle = "#f2f2f2"; ctx.font = "13px sans-serif"; ctx.fillText("Score " + score, 8, 16);
+  }
+  function step() { if (over) return; if (!hit(cur, cx, cy + 1)) cy++; else { lock(); spawn(); } draw(); }
+  cv.onkeydown = e => {
+    if (over || !cur) return;
+    if (e.key === "ArrowLeft" && !hit(cur, cx - 1, cy)) cx--;
+    if (e.key === "ArrowRight" && !hit(cur, cx + 1, cy)) cx++;
+    if (e.key === "ArrowDown" && !hit(cur, cx, cy + 1)) cy++;
+    if (e.key === "ArrowUp") { const m = rot(cur); if (!hit(m, cx, cy)) cur = Object.assign(m, { c: cur.c }); }
+    if (e.key === " ") { while (!hit(cur, cx, cy + 1)) cy++; step(); e.preventDefault(); }
+    draw();
+  };
+  start.onclick = () => { grid = Array.from({ length: R }, () => new Array(C).fill(0)); score = 0; over = false; msg.innerHTML = ""; clearInterval(timer); spawn(); draw(); cv.focus(); timer = setInterval(step, 450); };
+  box.append(el("p", "← → move · ↑ rotate · ↓ soft drop · Space hard drop. Click Start, then click the game to focus keys."), start, cv, msg);
+},
+
+/* --- Day 6: 2048 --- */
+g2048(box) {
+  const N = 4, cv = el("canvas"), ctx = cv.getContext("2d"), S = 64;
+  cv.width = N * S; cv.height = N * S; cv.className = "dcanvas"; cv.tabIndex = 0;
+  let g, score, over;
+  const msg = el("div", ""), start = el("button", "New game");
+  start.className = "dbtn";
+  const spawn = () => { const e = []; g.forEach((r, y) => r.forEach((v, x) => { if (!v) e.push([x, y]); })); if (e.length) { const [x, y] = e[Math.floor(Math.random() * e.length)]; g[y][x] = Math.random() < 0.9 ? 2 : 4; } };
+  const slide = r => { r = r.filter(Boolean); for (let i = 0; i < r.length - 1; i++) if (r[i] === r[i + 1]) { r[i] *= 2; score += r[i]; r.splice(i + 1, 1); } return r.concat(new Array(N - r.length).fill(0)); };
+  function move(dx, dy) {
+    if (over) return;
+    const before = JSON.stringify(g);
+    for (let i = 0; i < N; i++) {
+      let line = [];
+      for (let j = 0; j < N; j++) line.push(dx || dy ? g[dy ? j : i][dx ? N - 1 - j : j] : 0);
+      if (dx < 0 || dy < 0) line = line.reverse(), line = slide(line.reverse()), line = line; else line = slide(line);
+      // rebuild along direction
+      const out = new Array(N);
+      for (let j = 0; j < N; j++) out[j] = line[j];
+      for (let j = 0; j < N; j++) { if (dx === 1) g[i][N - 1 - j] = out[j]; else if (dx === -1) g[i][j] = out[j]; else if (dy === 1) g[N - 1 - j][i] = out[j]; else if (dy === -1) g[j][i] = out[j]; }
+    }
+    if (JSON.stringify(g) !== before) { spawn(); draw(); check(); }
+  }
+  function check() {
+    const full = g.every(r => r.every(Boolean));
+    const stuck = full && !g.some((r, y) => r.some((v, x) => (x + 1 < N && g[y][x + 1] === v) || (y + 1 < N && g[y + 1][x] === v)));
+    if (stuck) { over = true; msg.innerHTML = `<b style="color:var(--gold)">Game over — score ${score}.</b>`; }
+    if (g.some(r => r.includes(2048))) msg.innerHTML = `<b style="color:var(--gold)">🎉 You made 2048!</b>`;
+  }
+  function draw() {
+    ctx.fillStyle = "#0d0d0d"; ctx.fillRect(0, 0, cv.width, cv.height);
+    const hue = v => v ? `hsl(${45 - Math.min(10, Math.log2(v)) * 4},70%,${30 + Math.min(10, Math.log2(v)) * 3}%)` : "#1c1c1c";
+    g.forEach((r, y) => r.forEach((v, x) => {
+      ctx.fillStyle = hue(v); ctx.fillRect(x * S + 4, y * S + 4, S - 8, S - 8);
+      if (v) { ctx.fillStyle = "#fff"; ctx.font = "bold 20px sans-serif"; ctx.textAlign = "center"; ctx.fillText(v, x * S + S / 2, y * S + S / 2 + 7); }
+    }));
+    ctx.fillStyle = "#f2f2f2"; ctx.font = "13px sans-serif"; ctx.textAlign = "left"; ctx.fillText("Score " + score, 8, 16);
+  }
+  cv.onkeydown = e => {
+    if (e.key === "ArrowLeft") { move(-1, 0); e.preventDefault(); }
+    if (e.key === "ArrowRight") { move(1, 0); e.preventDefault(); }
+    if (e.key === "ArrowUp") { move(0, -1); e.preventDefault(); }
+    if (e.key === "ArrowDown") { move(0, 1); e.preventDefault(); }
+  };
+  // swipe support
+  let sx, sy;
+  cv.ontouchstart = e => { const t = e.touches[0]; sx = t.clientX; sy = t.clientY; };
+  cv.ontouchend = e => { const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy; if (Math.abs(dx) > Math.abs(dy)) move(dx > 0 ? 1 : -1, 0); else move(0, dy > 0 ? 1 : -1); };
+  start.onclick = () => { g = Array.from({ length: N }, () => new Array(N).fill(0)); score = 0; over = false; msg.innerHTML = ""; spawn(); spawn(); draw(); cv.focus(); };
+  box.append(el("p", "Arrow keys or swipe. Click New game, then click the board to focus keys."), start, cv, msg);
+  start.onclick();
+},
+
+/* --- Day 5: countdown timer --- */
+countdown(box) {
+  const mins = el("input"), disp = el("div", ""), msg = el("div", "");
+  mins.type = "number"; mins.value = "5"; mins.min = "0"; mins.className = "din";
+  let left = 0, timer = null;
+  const fmt = s => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+  const show = () => disp.innerHTML = `<div style="font-size:2.6rem;color:var(--gold);font-weight:800">${fmt(left)}</div>`;
+  const tick = () => { if (left <= 0) { clearInterval(timer); timer = null; msg.innerHTML = `<b style="color:var(--gold)">⏰ Time's up!</b>`; try { new AudioContext().createOscillator(); } catch (e) {} return; } left--; show(); };
+  const s = el("button", "Start"), p = el("button", "Pause"), r = el("button", "Reset");
+  s.className = "dbtn"; p.className = r.className = "dbtn ghost";
+  s.onclick = () => { if (timer) return; if (left <= 0) left = Math.max(0, Math.round(parseFloat(mins.value) || 0)) * 60; msg.innerHTML = ""; timer = setInterval(tick, 1000); };
+  p.onclick = () => { clearInterval(timer); timer = null; };
+  r.onclick = () => { clearInterval(timer); timer = null; left = 0; msg.innerHTML = ""; show(); };
+  box.append(el("label", "Minutes"), mins, el("div", ""), s, p, r, disp, msg); show();
+},
+
+/* --- Day 5: typing speed test --- */
+typing(box) {
+  const TEXTS = [
+    "The quick brown fox jumps over the lazy dog near the river bank.",
+    "Shipping a coding project every single day builds real momentum.",
+    "Toronto winters are cold but the coding streak never freezes."
+  ];
+  const target = TEXTS[Math.floor(Math.random() * TEXTS.length)];
+  const disp = el("div", `<p style="font-size:1rem;line-height:1.8">${target}</p>`);
+  const area = el("textarea"); area.rows = 3; area.className = "din"; area.style.width = "100%"; area.placeholder = "Start typing here…";
+  const out = el("div", "");
+  let t0 = null, done = false;
+  area.oninput = () => {
+    if (done) return;
+    if (!t0) t0 = Date.now();
+    const typed = area.value;
+    let correct = 0;
+    for (let i = 0; i < typed.length; i++) if (typed[i] === target[i]) correct++;
+    if (typed.length >= target.length) {
+      done = true;
+      const mins = (Date.now() - t0) / 60000, wpm = Math.round((typed.length / 5) / mins), acc = Math.round(correct / typed.length * 100);
+      out.innerHTML = `<div class="kv"><span>WPM</span><b style="color:var(--gold)">${wpm}</b></div><div class="kv"><span>Accuracy</span><b>${acc}%</b></div>`;
+    } else out.innerHTML = `<p style="color:var(--muted);font-size:.88rem">${typed.length}/${target.length} characters…</p>`;
+  };
+  box.append(disp, area, out);
+},
+
+/* --- Day 4: pomodoro timer --- */
+pomodoro(box) {
+  const WORK = 25 * 60, BREAK = 5 * 60;
+  let left = WORK, mode = "work", timer = null, cycles = 0;
+  const disp = el("div", ""), lbl = el("div", "");
+  const fmt = s => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+  const show = () => {
+    lbl.innerHTML = `<b style="color:${mode === "work" ? "var(--gold)" : "#7ddf8a"}">${mode === "work" ? "🍅 Focus" : "☕ Break"} · completed: ${cycles}</b>`;
+    disp.innerHTML = `<div style="font-size:2.6rem;font-weight:800;color:${mode === "work" ? "var(--gold)" : "#7ddf8a"}">${fmt(left)}</div>`;
+  };
+  const tick = () => {
+    if (left <= 0) { clearInterval(timer); timer = null; if (mode === "work") { cycles++; mode = "break"; left = BREAK; } else { mode = "work"; left = WORK; } show(); return; }
+    left--; show();
+  };
+  const s = el("button", "Start"), p = el("button", "Pause"), r = el("button", "Reset");
+  s.className = "dbtn"; p.className = r.className = "dbtn ghost";
+  s.onclick = () => { if (!timer) timer = setInterval(tick, 1000); };
+  p.onclick = () => { clearInterval(timer); timer = null; };
+  r.onclick = () => { clearInterval(timer); timer = null; mode = "work"; left = WORK; show(); };
+  box.append(lbl, el("div", ""), s, p, r, disp); show();
+},
+
+/* --- Day 4: wordle clone --- */
+wordle(box) {
+  const WORDS = ["CRANE", "HOUSE", "MUSIC", "LIGHT", "PLANT", "HEART", "MONEY", "WORLD", "DREAM", "TOAST", "PIANO", "RIVER", "SMILE", "BREAD", "CLOUD", "DANCE", "FLAME", "GRAPE", "HONEY", "IVORY"];
+  const target = WORDS[Math.floor(Math.random() * WORDS.length)];
+  const grid = el("div", ""), inp = el("input"), go = el("button", "Guess"), msg = el("div", "");
+  grid.style.cssText = "display:grid;grid-template-columns:repeat(5,44px);gap:5px;justify-content:center;margin:10px 0";
+  inp.className = "din"; inp.maxLength = 5; inp.placeholder = "5-letter word"; inp.style.textTransform = "uppercase";
+  go.className = "dbtn";
+  let row = 0, over = false;
+  const cells = [];
+  for (let i = 0; i < 30; i++) { const c = el("div", ""); c.style.cssText = "width:44px;height:44px;border:2px solid var(--line);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.3rem"; grid.append(c); cells.push(c); }
+  const score = guess => {
+    const res = new Array(5).fill("miss"), counts = {};
+    for (let i = 0; i < 5; i++) counts[target[i]] = (counts[target[i]] || 0) + 1;
+    for (let i = 0; i < 5; i++) if (guess[i] === target[i]) { res[i] = "hit"; counts[guess[i]]--; }
+    for (let i = 0; i < 5; i++) if (res[i] === "miss" && counts[guess[i]] > 0) { res[i] = "close"; counts[guess[i]]--; }
+    return res;
+  };
+  const paint = (r, guess, res) => {
+    const col = { hit: "#4a9e4a", close: "#c9a227", miss: "#333" };
+    for (let i = 0; i < 5; i++) { const c = cells[r * 5 + i]; c.textContent = guess[i]; c.style.background = col[res[i]]; c.style.borderColor = col[res[i]]; }
+  };
+  go.onclick = () => {
+    if (over) return;
+    const g = inp.value.trim().toUpperCase();
+    if (!/^[A-Z]{5}$/.test(g)) { msg.innerHTML = `<p style="color:#e06060">Enter a 5-letter word.</p>`; return; }
+    msg.innerHTML = "";
+    paint(row, g, score(g));
+    if (g === target) { over = true; msg.innerHTML = `<b style="color:var(--gold)">🎉 Got it in ${row + 1} ${row ? "guesses" : "guess"}!</b>`; }
+    else if (++row >= 6) { over = true; msg.innerHTML = `<b style="color:#e06060">Out of guesses — the word was ${target}.</b>`; }
+    inp.value = "";
+  };
+  inp.onkeydown = e => { if (e.key === "Enter") go.onclick(); };
+  box.append(grid, el("div", ""), inp, go, msg);
+},
+
+/* --- Day 3: QR code generator --- */
+qr(box) {
+  const inp = el("input"), go = el("button", "Generate"), out = el("div", "");
+  inp.placeholder = "Text or URL…"; inp.value = "https://github.com/OBG-ent"; inp.className = "din"; inp.style.width = "100%";
+  go.className = "dbtn"; out.style.cssText = "margin-top:10px;display:flex;justify-content:center;background:#fff;border-radius:8px;padding:10px;min-height:60px";
+  const gen = () => {
+    out.innerHTML = "";
+    if (typeof QRCode === "undefined") { out.innerHTML = `<p style="color:#333">QR library failed to load (offline?). Try again with a connection.</p>`; return; }
+    new QRCode(out, { text: inp.value || " ", width: 160, height: 160 });
+  };
+  go.onclick = gen; inp.onkeydown = e => { if (e.key === "Enter") gen(); };
+  box.append(inp, el("div", ""), go, out); gen();
+},
+
+/* --- Day 3: memory match --- */
+memory(box) {
+  const SYMS = ["🚀", "🎮", "🌱", "⚡", "🎵", "🏀", "📚", "☕"];
+  let deck = [...SYMS, ...SYMS].sort(() => Math.random() - 0.5);
+  const grid = el("div", ""), msg = el("div", "");
+  grid.style.cssText = "display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0";
+  let first = null, lock = false, moves = 0, matched = 0;
+  const cards = deck.map(s => {
+    const c = el("button", "?");
+    c.style.cssText = "aspect-ratio:1;font-size:1.8rem;background:#222;border:1px solid var(--line);border-radius:10px;cursor:pointer;color:var(--gold-soft)";
+    c.dataset.sym = s;
+    c.onclick = () => {
+      if (lock || c.dataset.done || c === first) return;
+      c.textContent = s; c.style.background = "#2c2c2c";
+      if (!first) { first = c; return; }
+      moves++; lock = true;
+      if (first.dataset.sym === s) {
+        first.dataset.done = c.dataset.done = "1";
+        first.style.borderColor = c.style.borderColor = "var(--gold)";
+        matched += 2; first = null; lock = false;
+        if (matched === 16) msg.innerHTML = `<b style="color:var(--gold)">🎉 Cleared in ${moves} moves!</b>`;
+      } else {
+        const a = first; first = null;
+        setTimeout(() => { a.textContent = "?"; c.textContent = "?"; a.style.background = c.style.background = "#222"; lock = false; }, 700);
+      }
+    };
+    grid.append(c); return c;
+  });
+  const again = el("button", "Shuffle & restart");
+  again.className = "dbtn ghost";
+  again.onclick = () => { box.innerHTML = ""; DEMOS.memory(box); };
+  box.append(el("p", "Find all 8 pairs."), grid, msg, again);
+},
+
+/* --- Day 2: password generator --- */
+password(box) {
+  const len = el("input"), lv = el("span", "16");
+  len.type = "range"; len.min = "8"; len.max = "40"; len.value = "16"; len.className = "din";
+  const opts = [["Uppercase", "ABCDEFGHIJKLMNOPQRSTUVWXYZ", true], ["Lowercase", "abcdefghijklmnopqrstuvwxyz", true], ["Digits", "0123456789", true], ["Symbols", "!@#$%^&*()-_=+[]{};:,.<>?", true]];
+  const boxes = opts.map(([l, chars, on]) => { const c = el("input"); c.type = "checkbox"; c.checked = on; const lab = el("label", ""); lab.append(c, " " + l); lab.style.display = "inline-block"; lab.style.marginRight = "12px"; return [c, chars]; });
+  const out = el("div", ""), go = el("button", "Generate"), cp = el("button", "Copy");
+  go.className = "dbtn"; cp.className = "dbtn ghost";
+  out.style.cssText = "font-family:monospace;word-break:break-all;background:#0d0d0d;border:1px solid var(--line);border-radius:8px;padding:10px;margin:10px 0;font-size:.95rem";
+  len.oninput = () => lv.textContent = len.value;
+  const gen = () => {
+    const pool = boxes.filter(([c]) => c.checked).map(([, ch]) => ch).join("");
+    if (!pool) { out.textContent = "Select at least one character set."; return ""; }
+    const buf = new Uint32Array(parseInt(len.value));
+    crypto.getRandomValues(buf);
+    const pw = [...buf].map(n => pool[n % pool.length]).join("");
+    out.textContent = pw;
+    return pw;
+  };
+  go.onclick = gen; cp.onclick = () => copyText(out.textContent, cp);
+  box.append(el("label", "Length: "), len, lv, el("div", ""), ...boxes.map(([c, ch], i) => { const l = el("label", ""); const inp = boxes[i][0]; l.append(inp, " " + opts[i][0]); l.style.display = "inline-block"; l.style.marginRight = "12px"; return l; }), el("div", ""), go, cp, out);
+  gen();
+},
+
+/* --- Day 2: snake --- */
+snake(box) {
+  const N = 20, cv = el("canvas"), ctx = cv.getContext("2d"), S = 16;
+  cv.width = N * S; cv.height = N * S; cv.className = "dcanvas"; cv.tabIndex = 0;
+  let sn, dir, nd, food, score, over, timer;
+  const msg = el("div", ""), start = el("button", "Start");
+  start.className = "dbtn";
+  const place = () => { while (true) { const x = Math.floor(Math.random() * N), y = Math.floor(Math.random() * N); if (!sn.some(s => s[0] === x && s[1] === y)) return [x, y]; } };
+  function tick() {
+    if (over) return;
+    dir = nd;
+    const h = [sn[0][0] + dir[0], sn[0][1] + dir[1]];
+    if (h[0] < 0 || h[1] < 0 || h[0] >= N || h[1] >= N || sn.some(s => s[0] === h[0] && s[1] === h[1])) {
+      over = true; clearInterval(timer); msg.innerHTML = `<b style="color:#e06060">Game over — score ${score}.</b>`; return;
+    }
+    sn.unshift(h);
+    if (h[0] === food[0] && h[1] === food[1]) { score += 10; food = place(); } else sn.pop();
+    ctx.fillStyle = "#0d0d0d"; ctx.fillRect(0, 0, cv.width, cv.height);
+    ctx.fillStyle = "#e06060"; ctx.fillRect(food[0] * S + 2, food[1] * S + 2, S - 4, S - 4);
+    ctx.fillStyle = "#d4af37";
+    sn.forEach((s, i) => ctx.fillRect(s[0] * S + 2, s[1] * S + 2, S - 4, S - 4));
+    ctx.fillStyle = "#f2f2f2"; ctx.font = "13px sans-serif"; ctx.fillText("Score " + score, 8, 16);
+  }
+  const K = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0] };
+  cv.onkeydown = e => { if (K[e.key]) { const d = K[e.key]; if (d[0] !== -dir[0] || d[1] !== -dir[1]) nd = d; e.preventDefault(); } };
+  const pad = el("div", "");
+  pad.className = "row"; pad.style.justifyContent = "center";
+  [["▲", [0, -1]], ["◀", [-1, 0]], ["▼", [0, 1]], ["▶", [1, 0]]].forEach(([t, d]) => {
+    const b = el("button", t); b.className = "dbtn ghost"; b.style.fontSize = "1.1rem";
+    b.onclick = () => { if (d[0] !== -dir[0] || d[1] !== -dir[1]) nd = d; cv.focus(); };
+    pad.append(b);
+  });
+  start.onclick = () => { sn = [[10, 10], [9, 10], [8, 10]]; dir = nd = [1, 0]; score = 0; over = false; food = place(); msg.innerHTML = ""; clearInterval(timer); timer = setInterval(tick, 110); cv.focus(); };
+  box.append(el("p", "Arrow keys or the buttons below. Click Start, then click the game to focus keys."), start, cv, pad, msg);
+},
+
+/* --- Day 1: todo list --- */
+todo(box) {
+  const KEY = "td_todos_v1";
+  const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { return []; } };
+  const save = a => localStorage.setItem(KEY, JSON.stringify(a));
+  const inp = el("input"), add = el("button", "Add"), list = el("div", "");
+  inp.placeholder = "What needs doing?"; inp.className = "din"; inp.style.width = "70%"; add.className = "dbtn";
+  const render = () => {
+    list.innerHTML = "";
+    const items = load(), left = items.filter(t => !t.done).length;
+    items.forEach(t => {
+      const d = el("div", ""), cb = el("input"), del = el("button", "✕");
+      cb.type = "checkbox"; cb.checked = t.done; del.className = "dbtn ghost"; del.style.padding = "2px 8px";
+      const s = el("span", t.text.replace(/</g, "&lt;"));
+      if (t.done) s.style.textDecoration = "line-through", s.style.color = "var(--muted)";
+      cb.onchange = () => { const a = load(), x = a.find(y => y.id === t.id); x.done = cb.checked; save(a); render(); };
+      del.onclick = () => { save(load().filter(y => y.id !== t.id)); render(); };
+      d.style.cssText = "display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px dashed #2c2c2c";
+      d.append(cb, s, del); list.append(d);
+    });
+    list.append(el("p", `<span style="color:var(--muted);font-size:.85rem">${left} remaining</span>`));
+  };
+  const go = () => { if (!inp.value.trim()) return; const a = load(); a.push({ id: Date.now(), text: inp.value.trim(), done: false }); save(a); inp.value = ""; render(); };
+  add.onclick = go; inp.onkeydown = e => { if (e.key === "Enter") go(); };
+  box.append(el("div", ""), inp, add, list); render();
+},
+
+/* --- Bonus: expense tracker --- */
+expense(box) {
+  const KEY = "ex_exp_v1";
+  const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { return []; } };
+  const save = a => localStorage.setItem(KEY, JSON.stringify(a));
+  const d = el("input"), a = el("input"), add = el("button", "Add expense"), list = el("div", ""), tot = el("div", "");
+  d.placeholder = "What for?"; d.className = "din"; a.placeholder = "Amount"; a.type = "number"; a.min = "0"; a.step = "0.01"; a.className = "din";
+  add.className = "dbtn";
+  const render = () => {
+    list.innerHTML = "";
+    const items = load().slice().reverse();
+    let t = 0;
+    items.forEach(e => {
+      t += e.amt;
+      const r = el("div", ""), del = el("button", "✕");
+      del.className = "dbtn ghost"; del.style.padding = "2px 8px";
+      del.onclick = () => { save(load().filter(x => x.id !== e.id)); render(); };
+      r.className = "kv";
+      r.append(el("span", `${e.desc.replace(/</g, "&lt;")} <small style="color:var(--muted)">${e.date}</small>`), el("span", ""));
+      r.lastChild.textContent = money(e.amt); r.append(del);
+      list.append(r);
+    });
+    tot.innerHTML = `<div class="kv"><span><b>Total spent</b></span><b style="color:var(--gold)">${money(t)}</b></div>`;
+    if (!items.length) list.innerHTML = `<p style="color:var(--muted);font-size:.88rem">No expenses yet.</p>`;
+  };
+  add.onclick = () => {
+    const amt = parseFloat(a.value);
+    if (!d.value.trim() || isNaN(amt) || amt <= 0) return;
+    const items = load(); items.push({ id: Date.now(), desc: d.value.trim(), amt, date: new Date().toISOString().slice(0, 10) });
+    save(items); d.value = ""; a.value = ""; render();
+  };
+  box.append(el("div", ""), d, a, add, tot, list); render();
+}
+};
+
+/* ---------- page render ---------- */
+const grid = document.getElementById("grid");
+const search = document.getElementById("search");
+const techChips = document.getElementById("techChips");
+const dayChips = document.getElementById("dayChips");
+const nores = document.getElementById("nores");
+let activeTech = new Set(), activeDay = new Set();
+
+/* stats */
+(() => {
+  const techs = new Set(); PROJECTS.forEach(p => p.tech.forEach(t => techs.add(t)));
+  const days = new Set(PROJECTS.map(p => p.day)).size;
+  document.getElementById("stats").innerHTML = [
+    [PROJECTS.length, "Projects"], [days, "Days shipped"],
+    [Object.keys(DEMOS).length, "Live demos"], [techs.size, "Technologies"]
+  ].map(([n, l]) => `<div class="stat"><b>${n}</b><span>${l}</span></div>`).join("");
+})();
+
+/* chips */
+function buildChips(container, items, active, label) {
+  container.innerHTML = `<div class="chip-group-label">${label}</div>`;
+  items.forEach(t => {
+    const c = el("span", t); c.className = "chip";
+    c.onclick = () => { active.has(t) ? active.delete(t) : active.add(t); c.classList.toggle("on"); render(); };
+    container.append(c);
+  });
+}
+const allTech = [...new Set(PROJECTS.flatMap(p => p.tech))].sort();
+const dayOrder = ["Day 12","Day 11","Day 10","Day 9","Day 8","Day 7","Day 6","Day 5","Day 4","Day 3","Day 2","Day 1","Bonus"];
+const allDays = [...new Set(PROJECTS.map(p => p.day))].sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b));
+buildChips(techChips, allTech, activeTech, "Filter by tech");
+buildChips(dayChips, allDays, activeDay, "Filter by day");
+
+/* cards */
+function card(p) {
+  const c = el("article", "");
+  c.className = "card";
+  const tech = p.tech.map(t => `<span>${t}</span>`).join("");
+  c.innerHTML = `<span class="day">${p.day}</span><h3>${p.name}</h3><p class="desc">${p.description}</p>
+    <div class="tech">${tech}</div>
+    <div class="highlight"><b>Recruiter note:</b> ${p.highlight}</div>
+    <div class="card-links">
+      <a class="gh" href="${p.url}" target="_blank" rel="noopener">View on GitHub ↗</a>
+      <button class="demo-toggle">▶ Try it live</button>
+    </div>
+    <div class="demo-box"></div>`;
+  const box = c.querySelector(".demo-box"), btn = c.querySelector(".demo-toggle");
+  let built = false;
+  btn.onclick = () => {
+    const open = box.classList.toggle("open");
+    btn.textContent = open ? "▼ Hide demo" : "▶ Try it live";
+    if (open && !built && DEMOS[p.demo]) { built = true; try { DEMOS[p.demo](box); } catch (e) { box.innerHTML = `<p style="color:#e06060">Demo failed to load.</p>`; } }
+  };
+  return c;
+}
+
+function render() {
+  const q = search.value.trim().toLowerCase();
+  grid.innerHTML = "";
+  let shown = 0;
+  PROJECTS.forEach(p => {
+    if (q && !(p.name + " " + p.description).toLowerCase().includes(q)) return;
+    if (activeTech.size && !p.tech.some(t => activeTech.has(t))) return;
+    if (activeDay.size && !activeDay.has(p.day)) return;
+    grid.append(card(p)); shown++;
+  });
+  nores.style.display = shown ? "none" : "block";
+}
+search.addEventListener("input", render);
+render();
+</script>
+</body>
+</html>
