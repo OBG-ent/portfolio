@@ -103,6 +103,8 @@ footer a{color:var(--gold)}
    {day, name, url, description, tech:[], highlight, demo}
    ============================================================ */
 const PROJECTS = [
+{day:"Day 13",name:"simon-game",url:"https://github.com/OBG-ent/day-13-simon-game",description:"The classic 4-pad memory game — the machine plays an ever-longer sequence you must repeat. Written in TypeScript with tsconfig and compiled dist output.",tech:["TypeScript"],highlight:"The streak's first TypeScript project — typed sources, a tsconfig, and compiled dist. Strict types on a real game.",demo:"simon"},
+{day:"Day 13",name:"rock-paper-scissors",url:"https://github.com/OBG-ent/day-13-rock-paper-scissors",description:"You vs the computer with a live scoreboard — first to 5 wins.",tech:["JavaScript"],highlight:"Match state done cleanly — scoreboard tracking and first-to-5 win detection in a tight little loop.",demo:"rps"},
 {day:"Day 12",name:"quote-generator",url:"https://github.com/OBG-ent/day-12-quote-generator",description:"Random quote generator with categories, dark mode, and copy button.",tech:["HTML","CSS","JS"],highlight:"Shows UI polish and attention to detail — categories, theming, and clipboard UX in one tidy page.",demo:"quote"},
 {day:"Day 12",name:"pixel-art-maker",url:"https://github.com/OBG-ent/day-12-pixel-art-maker",description:"Pixel-art editor with flood fill, gallery, and PNG export.",tech:["JavaScript","Canvas"],highlight:"Canvas manipulation plus real file export — demonstrates working with binary output in the browser.",demo:"pixel"},
 {day:"Day 11",name:"bill-splitter",url:"https://github.com/OBG-ent/day-11-bill-splitter",description:"Splits restaurant bills proportionally with exact tax+tip math (leftover cent to biggest remainder).",tech:["Python","JS"],highlight:"The rounding logic is the real flex — parts always sum to the total exactly. Precision under constraints.",demo:"bill"},
@@ -144,6 +146,82 @@ function copyText(t, btn) {
    DEMOS — one small render function per project, keyed by demo key
    ============================================================ */
 const DEMOS = {
+
+/* --- Day 13: simon game --- */
+simon(box) {
+  const COLORS = [["#e74c3c", 0], ["#2ecc71", 1], ["#3498db", 2], ["#f1c40f", 3]];
+  const pads = [], seq = [];
+  let accepting = false, idx = 0, round = 0;
+  const status = el("div", ""), grid = el("div", "");
+  grid.style.cssText = "display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:240px;margin:8px 0";
+  COLORS.forEach(([c, i]) => {
+    const p = el("button", "");
+    p.className = "dbtn ghost";
+    p.style.cssText = `background:${c};opacity:.45;min-height:64px;border-radius:8px`;
+    p.onclick = () => press(i);
+    pads.push(p); grid.append(p);
+  });
+  const flash = i => new Promise(res => {
+    pads[i].style.opacity = "1";
+    setTimeout(() => { pads[i].style.opacity = ".45"; setTimeout(res, 120); }, 350);
+  });
+  const play = async () => {
+    accepting = false;
+    seq.push(Math.floor(Math.random() * 4));
+    idx = 0; round = seq.length;
+    status.innerHTML = `<p style="color:var(--gold)">Round ${round} — watch…</p>`;
+    await new Promise(r => setTimeout(r, 500));
+    for (const i of seq) await flash(i);
+    status.innerHTML = `<p style="color:var(--gold)">Round ${round} — your turn!</p>`;
+    accepting = true;
+  };
+  const press = async i => {
+    if (!accepting) return;
+    await flash(i);
+    if (i !== seq[idx]) {
+      accepting = false;
+      status.innerHTML = `<p style="color:var(--gold)">Game over at round ${round}. <button class="dbtn">Play again</button></p>`;
+      status.querySelector("button").onclick = () => { seq.length = 0; play(); };
+      return;
+    }
+    idx++;
+    if (idx === seq.length) setTimeout(play, 500);
+  };
+  const start = el("button", "Start");
+  start.className = "dbtn";
+  start.onclick = () => { start.remove(); play(); };
+  box.append(el("label", "Repeat the sequence"), start, grid, status);
+},
+
+/* --- Day 13: rock paper scissors --- */
+rps(box) {
+  let you = 0, cpu = 0;
+  const EMOJI = { rock: "🪨", paper: "📄", scissors: "✂️" };
+  const WIN = { rock: "scissors", paper: "rock", scissors: "paper" };
+  const board = el("div", ""), msg = el("div", ""), row = el("div", "");
+  const btns = Object.keys(EMOJI).map(k => {
+    const b = el("button", EMOJI[k] + " " + k);
+    b.className = "dbtn ghost";
+    b.onclick = () => {
+      const c = ["rock", "paper", "scissors"][Math.floor(Math.random() * 3)];
+      let line;
+      if (k === c) line = "Tie!";
+      else if (WIN[k] === c) { you++; line = `${EMOJI[k]} beats ${EMOJI[c]} — you score!`; }
+      else { cpu++; line = `${EMOJI[c]} beats ${EMOJI[k]} — CPU scores.`; }
+      msg.innerHTML = `<div style="margin:8px 0">${line} <span style="color:var(--muted)">(CPU threw ${EMOJI[c]})</span></div>`;
+      board.innerHTML = `<div class="kv"><span>You</span><b>${you}</b></div><div class="kv"><span>CPU</span><b>${cpu}</b></div>`;
+      if (you >= 5 || cpu >= 5) {
+        const won = you >= 5;
+        msg.innerHTML += `<p style="font-weight:800;color:var(--gold)">${won ? "🏆 You win the match!" : "CPU takes the match."}</p>`;
+        you = 0; cpu = 0;
+        board.innerHTML += `<p style="font-size:.8rem;color:var(--muted)">First to 5 — scoreboard reset.</p>`;
+      }
+    };
+    return b;
+  });
+  row.append(...btns);
+  box.append(el("label", "First to 5 wins"), board, row, msg);
+},
 
 /* --- Day 12: quote generator --- */
 quote(box) {
