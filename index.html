@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Reynold Obago — Build In Public Portfolio</title>
-<meta name="description" content="Reynold Obago ships a coding project every day. 24 projects, live demos, all open source.">
+<meta name="description" content="Reynold Obago ships a coding project every day. 28 projects, live demos, all open source.">
 <style>
 :root{
   --black:#0a0a0a; --ink:#111; --card:#161616; --line:#2a2a2a;
@@ -103,6 +103,8 @@ footer a{color:var(--gold)}
    {day, name, url, description, tech:[], highlight, demo}
    ============================================================ */
 const PROJECTS = [
+{day:"Day 14",name:"magic-8-ball",url:"https://github.com/OBG-ent/day-14-magic-8-ball",description:"Glossy 3D fortune-teller ball — ask a question, shake it, and one of 25 randomized fortunes appears.",tech:["JavaScript"],highlight:"Playful physics: a shake animation sells the toy feel; answers drawn from a 25-fortune deck.",demo:"eightball"},
+{day:"Day 14",name:"flappy-bird-clone",url:"https://github.com/OBG-ent/day-14-flappy-bird-clone",description:"Playable Flappy Bird clone on canvas — scoring, persistent best score, particles, and synthesized sound.",tech:["JavaScript","Canvas"],highlight:"A full game loop on canvas: gravity, pipe collision, particle bursts, and Web Audio blips.",demo:"flappy"},
 {day:"Day 13",name:"simon-game",url:"https://github.com/OBG-ent/day-13-simon-game",description:"The classic 4-pad memory game — the machine plays an ever-longer sequence you must repeat. Written in TypeScript with tsconfig and compiled dist output.",tech:["TypeScript"],highlight:"The streak's first TypeScript project — typed sources, a tsconfig, and compiled dist. Strict types on a real game.",demo:"simon"},
 {day:"Day 13",name:"rock-paper-scissors",url:"https://github.com/OBG-ent/day-13-rock-paper-scissors",description:"You vs the computer with a live scoreboard — first to 5 wins.",tech:["JavaScript"],highlight:"Match state done cleanly — scoreboard tracking and first-to-5 win detection in a tight little loop.",demo:"rps"},
 {day:"Day 12",name:"quote-generator",url:"https://github.com/OBG-ent/day-12-quote-generator",description:"Random quote generator with categories, dark mode, and copy button.",tech:["HTML","CSS","JS"],highlight:"Shows UI polish and attention to detail — categories, theming, and clipboard UX in one tidy page.",demo:"quote"},
@@ -924,6 +926,68 @@ expense(box) {
     save(items); d.value = ""; a.value = ""; render();
   };
   box.append(el("div", ""), d, a, add, tot, list); render();
+},
+
+/* --- Day 14: magic 8-ball --- */
+eightball(box) {
+  const FORTUNES = ["It is certain", "It is decidedly so", "Without a doubt", "Yes definitely", "You may rely on it",
+    "As I see it, yes", "Most likely", "Outlook good", "Yes", "Signs point to yes",
+    "Reply hazy, try again", "Ask again later", "Better not tell you now", "Cannot predict now", "Concentrate and ask again",
+    "Don't count on it", "My reply is no", "My sources say no", "Outlook not so good", "Very doubtful"];
+  const q = el("input"), shake = el("button", "Shake the ball"), res = el("div", "");
+  q.placeholder = "Ask a yes-or-no question…"; q.className = "din"; q.style.width = "100%"; shake.className = "dbtn";
+  const ball = el("div", `<div style="width:110px;height:110px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#3a3a3a,#0d0d0d 70%);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;margin:12px auto"><div style="width:52px;height:52px;border-radius:50%;background:#d4af37;color:#111;font-size:.62rem;font-weight:800;display:flex;align-items:center;justify-content:center;text-align:center;padding:6px" id="ans">8</div></div>`);
+  shake.onclick = () => {
+    const ans = ball.querySelector("#ans");
+    ans.textContent = "…"; ans.style.fontSize = "1.2rem";
+    let n = 0;
+    const t = setInterval(() => {
+      ans.textContent = FORTUNES[Math.floor(Math.random() * FORTUNES.length)];
+      ans.style.fontSize = ".55rem";
+      if (++n >= 8) { clearInterval(t); }
+    }, 90);
+  };
+  box.append(el("label", "Magic 8-Ball"), q, shake, ball);
+},
+
+/* --- Day 14: flappy bird clone --- */
+flappy(box) {
+  const cv = el("canvas"), ctx = cv.getContext("2d");
+  cv.width = 360; cv.height = 280; cv.className = "dcanvas"; cv.tabIndex = 0;
+  let y = 140, vy = 0, pipes = [], score = 0, best = 0, over = false, started = false, raf, t = 0;
+  try { best = parseInt(localStorage.getItem("flappy-demo-best") || "0"); } catch (e) {}
+  const start = el("button", "Start / flap"), msg = el("div", "");
+  start.className = "dbtn";
+  function reset() { y = 140; vy = 0; pipes = []; score = 0; over = false; started = true; t = 0; msg.innerHTML = ""; loop(); }
+  function flap() { if (over) return; if (!started) { reset(); return; } vy = -5.2; }
+  start.onclick = flap;
+  cv.onclick = flap;
+  cv.onkeydown = e => { if (e.key === " " || e.key === "ArrowUp") { e.preventDefault(); flap(); } };
+  function loop() {
+    if (!started) return;
+    t++;
+    vy += 0.35; y += vy;
+    if (t % 70 === 0) { const gap = 95, gh = 50 + Math.random() * 120; pipes.push({ x: cv.width, gh: gh, gap: gap, hit: false }); }
+    pipes.forEach(p => { p.x -= 2.4; });
+    if (pipes.length && pipes[0].x < -40) pipes.shift();
+    pipes.forEach(p => {
+      if (!p.hit && p.x + 40 < 90) { p.hit = true; score++; }
+      if (90 + 12 > p.x && 90 - 12 < p.x + 40 && (y - 12 < p.gh || y + 12 > p.gh + p.gap)) over = true;
+    });
+    if (y < 0 || y > cv.height) over = true;
+    ctx.fillStyle = "#0d0d0d"; ctx.fillRect(0, 0, cv.width, cv.height);
+    ctx.fillStyle = "#2a2a2a"; pipes.forEach(p => { ctx.fillRect(p.x, 0, 40, p.gh); ctx.fillRect(p.x, p.gh + p.gap, 40, cv.height - p.gh - p.gap); });
+    ctx.fillStyle = "#d4af37"; ctx.beginPath(); ctx.arc(90, y, 12, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#f2f2f2"; ctx.font = "700 16px sans-serif"; ctx.fillText("Score: " + score, 10, 24);
+    if (over) {
+      if (score > best) { best = score; try { localStorage.setItem("flappy-demo-best", String(best)); } catch (e) {} }
+      msg.innerHTML = `<p style="color:var(--gold)">Game over — score ${score}, best ${best}. <button class="dbtn">Play again</button></p>`;
+      msg.querySelector("button").onclick = reset; started = false; return;
+    }
+    raf = requestAnimationFrame(loop);
+  }
+  msg.innerHTML = `<p style="color:var(--muted);font-size:.88rem">Click the canvas (or press Space) to flap through the pipes.</p>`;
+  box.append(el("label", "Flappy Bird — click / Space to flap"), start, cv, msg);
 }
 };
 
