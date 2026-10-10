@@ -103,6 +103,8 @@ footer a{color:var(--gold)}
    {day, name, url, description, tech:[], highlight, demo}
    ============================================================ */
 const PROJECTS = [
+{day:"Day 15",name:"morse-code-translator",url:"https://github.com/OBG-ent/day-15-morse-code-translator",description:"Type a message, get dots and dashes — decodes morse back to text too, and plays it as classic radio beeps.",tech:["JavaScript","HTML","CSS"],highlight:"Regex auto-detects what you typed, and the Web Audio API schedules the beeps with real morse timing.",demo:"morse"},
+{day:"Day 15",name:"file-organizer",url:"https://github.com/OBG-ent/day-15-file-organizer",description:"Python CLI that sorts a messy folder into tidy category subfolders — dry-run preview, one-command undo, and collision-free renaming (browser simulation here).",tech:["Python","JavaScript"],highlight:"Safety-first engineering — dry-run plans before a single move, JSON move-logs make undo possible, renames beat overwrites.",demo:"fileorganizer"},
 {day:"Day 14",name:"magic-8-ball",url:"https://github.com/OBG-ent/day-14-magic-8-ball",description:"Glossy 3D fortune-teller ball — ask a question, shake it, and one of 25 randomized fortunes appears.",tech:["JavaScript"],highlight:"Playful physics: a shake animation sells the toy feel; answers drawn from a 25-fortune deck.",demo:"eightball"},
 {day:"Day 14",name:"flappy-bird-clone",url:"https://github.com/OBG-ent/day-14-flappy-bird-clone",description:"Playable Flappy Bird clone on canvas — scoring, persistent best score, particles, and synthesized sound.",tech:["JavaScript","Canvas"],highlight:"A full game loop on canvas: gravity, pipe collision, particle bursts, and Web Audio blips.",demo:"flappy"},
 {day:"Day 13",name:"simon-game",url:"https://github.com/OBG-ent/day-13-simon-game",description:"The classic 4-pad memory game — the machine plays an ever-longer sequence you must repeat. Written in TypeScript with tsconfig and compiled dist output.",tech:["TypeScript"],highlight:"The streak's first TypeScript project — typed sources, a tsconfig, and compiled dist. Strict types on a real game.",demo:"simon"},
@@ -988,6 +990,67 @@ flappy(box) {
   }
   msg.innerHTML = `<p style="color:var(--muted);font-size:.88rem">Click the canvas (or press Space) to flap through the pipes.</p>`;
   box.append(el("label", "Flappy Bird — click / Space to flap"), start, cv, msg);
+},
+
+/* --- Day 15: morse code translator --- */
+morse(box) {
+  const MORSE = {"A":".-","B":"-...","C":"-.-.","D":"-..","E":".","F":"..-.","G":"--.","H":"....","I":"..","J":".---","K":"-.-","L":".-..","M":"--","N":"-.","O":"---","P":".--.","Q":"--.-","R":".-.","S":"...","T":"-","U":"..-","V":"...-","W":".--","X":"-..-","Y":"-.--","Z":"--..","0":"-----","1":".----","2":"..---","3":"...--","4":"....-","5":".....","6":"-....","7":"--...","8":"---..","9":"----."," ":"/",".":".-.-.-",",":"--..--","?":"..--..","!":"-.-.--"};
+  const REV = {}; for (const k in MORSE) REV[MORSE[k]] = k;
+  const inp = el("input"); inp.type = "text"; inp.placeholder = "Type a message or morse (···)"; inp.className = "din"; inp.style.width = "100%";
+  const out = el("div", ""), btnM = el("button", "To morse"), btnT = el("button", "To text"), btnP = el("button", "▶ Play"), cpy = el("button", "Copy");
+  btnM.className = "dbtn"; btnT.className = "dbtn ghost"; btnP.className = "dbtn ghost"; cpy.className = "dbtn ghost";
+  let last = "";
+  const show = t => { last = t; out.innerHTML = `<p style="color:#39ff6a;font-family:monospace;font-size:1.1rem;word-break:break-all;margin:10px 0">${t || "&nbsp;"}</p>`; };
+  const toMorse = () => show(inp.value.toUpperCase().split("").map(c => MORSE[c] || c).join(" "));
+  const toText = () => show(inp.value.trim().split(/\s+/).map(w => REV[w] || w).join(" "));
+  btnP.onclick = () => {
+    const sig = last || inp.value.toUpperCase().split("").map(c => MORSE[c] || c).join(" ");
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+    const ctx = new AC(), t0 = ctx.currentTime + 0.05, unit = 0.07;
+    let t = t0;
+    for (const ch of sig) {
+      if (ch === "." || ch === "-") {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = "sine"; o.frequency.value = 700;
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.3, t + 0.01);
+        g.gain.setValueAtTime(0.3, t + unit * (ch === "." ? 1 : 3) - 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + unit * (ch === "." ? 1 : 3));
+        o.connect(g); g.connect(ctx.destination);
+        o.start(t); o.stop(t + unit * (ch === "." ? 1 : 3) + 0.02);
+        t += unit * (ch === "." ? 2 : 4);
+      } else t += unit * 3;
+    }
+    ctx.close && setTimeout(() => ctx.close(), (t - t0) * 1000 + 300);
+  };
+  btnM.onclick = toMorse; btnT.onclick = toText; cpy.onclick = () => copyText(last, cpy);
+  inp.oninput = () => show(/^[.\-\s\/]+$/.test(inp.value.trim()) && inp.value.trim() ? inp.value.trim().split(/\s+/).map(w => REV[w] || w).join(" ") : inp.value.toUpperCase().split("").map(c => MORSE[c] || c).join(" "));
+  box.append(el("label", "Morse translator — type to auto-convert, or play the beeps"), inp, el("div", ""), out);
+  box.children[2].append(btnM, btnT, btnP, cpy);
+  show("");
+},
+
+/* --- Day 15: file organizer (simulated CLI run) --- */
+fileorganizer(box) {
+  const files = ["photo.png", "song.mp3", "report.pdf", "archive.zip", "notes.txt", "movie.mp4", "script.py", "app.exe", "photo (2).png"];
+  const RULES = {"Images":["png","jpg","gif","svg"], "Documents":["pdf","txt","docx"], "Audio":["mp3","wav"], "Video":["mp4","mkv"], "Archives":["zip","tar"], "Code":["py","js","html"], "Executables":["exe","dmg"]};
+  const catOf = f => { const e = f.split(".").pop().toLowerCase(); for (const c in RULES) if (RULES[c].includes(e)) return c; return "Other"; };
+  const log = el("div", ""), out = el("div", ""), run = el("button", "Run --dry-run"), undo = el("button", "Undo"), reset = el("button", "Reset");
+  run.className = "dbtn"; undo.className = "dbtn ghost"; reset.className = "dbtn ghost"; undo.disabled = true;
+  const render = lines => { log.innerHTML = `<pre style="background:#0d0d0d;border-radius:8px;padding:10px;font-size:.82rem;color:#f2f2f2;white-space:pre-wrap">$ ${lines}</pre>`; };
+  render("python main.py organize ~/Downloads");
+  out.innerHTML = `<p style="color:var(--muted);font-size:.88rem">A simulated messy folder — the real Python CLI scans your actual files. Hit <b>--dry-run</b> to see the plan first.</p>`;
+  run.onclick = () => {
+    const groups = {};
+    files.forEach(f => { const c = catOf(f); (groups[c] = groups[c] || []).push(f); });
+    const lines = ["python main.py organize ~/Downloads --dry-run", "", "Dry run — " + files.length + " file(s) would be moved:", ""]
+      .concat(Object.keys(groups).sort().map(c => "  " + c.padEnd(12) + "<- " + groups[c].length + " file(s)"));
+    render(lines.join("\n"));
+    out.innerHTML = `<p style="color:var(--gold);font-size:.9rem">Plan shown — nothing moved. The real CLI moves files, then <b>undo</b> restores them from the move-log.</p>`;
+    run.disabled = true; undo.disabled = false;
+  };
+  undo.onclick = () => { render("python main.py undo\n\nRestored " + files.length + " file(s) to their original locations."); out.innerHTML = `<p style="color:var(--muted);font-size:.88rem">All moved files restored from the move-log — the safety net that makes the real tool trustworthy.</p>`; run.disabled = true; undo.disabled = true; };
+  reset.onclick = () => { render("python main.py organize ~/Downloads"); run.disabled = false; undo.disabled = true; };
+  box.append(el("label", "File organizer — dry-run a cleanup, then undo it"), run, undo, reset, log, out);
 }
 };
 
@@ -1019,7 +1082,7 @@ function buildChips(container, items, active, label) {
   });
 }
 const allTech = [...new Set(PROJECTS.flatMap(p => p.tech))].sort();
-const dayOrder = ["Day 12","Day 11","Day 10","Day 9","Day 8","Day 7","Day 6","Day 5","Day 4","Day 3","Day 2","Day 1","Bonus"];
+const dayOrder = ["Day 15","Day 14","Day 13","Day 12","Day 11","Day 10","Day 9","Day 8","Day 7","Day 6","Day 5","Day 4","Day 3","Day 2","Day 1","Bonus"];
 const allDays = [...new Set(PROJECTS.map(p => p.day))].sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b));
 buildChips(techChips, allTech, activeTech, "Filter by tech");
 buildChips(dayChips, allDays, activeDay, "Filter by day");
