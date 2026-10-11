@@ -103,6 +103,8 @@ footer a{color:var(--gold)}
    {day, name, url, description, tech:[], highlight, demo}
    ============================================================ */
 const PROJECTS = [
+{day:"Day 16",name:"stopwatch",url:"https://github.com/OBG-ent/day-16-stopwatch",description:"Millisecond-precision stopwatch with lap tracking, fastest/slowest lap highlights, live stats, and keyboard shortcuts — all in a single HTML file.",tech:["JavaScript","HTML","CSS"],highlight:"Drift-free timing: performance.now() plus an accumulated time bank, because setInterval alone drifts.",demo:"stopwatch"},
+{day:"Day 16",name:"hangman-game",url:"https://github.com/OBG-ent/day-16-hangman-game",description:"The classic word game rebuilt with an animated SVG figure, 96 words across 4 categories and 3 difficulties, hints, scoring, and streaks (simplified demo here).",tech:["JavaScript","HTML","CSS"],highlight:"Clean game state management — a Set for O(1) guessed-letter lookups and localStorage for the best streak.",demo:"hangman"},
 {day:"Day 15",name:"morse-code-translator",url:"https://github.com/OBG-ent/day-15-morse-code-translator",description:"Type a message, get dots and dashes — decodes morse back to text too, and plays it as classic radio beeps.",tech:["JavaScript","HTML","CSS"],highlight:"Regex auto-detects what you typed, and the Web Audio API schedules the beeps with real morse timing.",demo:"morse"},
 {day:"Day 15",name:"file-organizer",url:"https://github.com/OBG-ent/day-15-file-organizer",description:"Python CLI that sorts a messy folder into tidy category subfolders — dry-run preview, one-command undo, and collision-free renaming (browser simulation here).",tech:["Python","JavaScript"],highlight:"Safety-first engineering — dry-run plans before a single move, JSON move-logs make undo possible, renames beat overwrites.",demo:"fileorganizer"},
 {day:"Day 14",name:"magic-8-ball",url:"https://github.com/OBG-ent/day-14-magic-8-ball",description:"Glossy 3D fortune-teller ball — ask a question, shake it, and one of 25 randomized fortunes appears.",tech:["JavaScript"],highlight:"Playful physics: a shake animation sells the toy feel; answers drawn from a 25-fortune deck.",demo:"eightball"},
@@ -150,6 +152,73 @@ function copyText(t, btn) {
    DEMOS — one small render function per project, keyed by demo key
    ============================================================ */
 const DEMOS = {
+
+/* --- Day 16: stopwatch --- */
+stopwatch(box) {
+  let startT = 0, bank = 0, running = false, laps = [], raf;
+  const disp = el("div", "00:00.00");
+  disp.style.cssText = "font-size:2.4rem;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;margin:8px 0";
+  const fmt = ms => {
+    const cs = Math.floor(ms / 10);
+    return String(Math.floor(cs / 6000)).padStart(2, "0") + ":" + String(Math.floor(cs / 100) % 60).padStart(2, "0") + "." + String(cs % 100).padStart(2, "0");
+  };
+  const tick = () => { if (running) { disp.textContent = fmt(bank + performance.now() - startT); raf = requestAnimationFrame(tick); } };
+  const list = el("div", "");
+  const startBtn = el("button", "Start"), lapBtn = el("button", "Lap"), resetBtn = el("button", "Reset");
+  [startBtn, lapBtn, resetBtn].forEach(b => { b.className = "dbtn ghost"; b.style.margin = "4px"; });
+  startBtn.onclick = () => {
+    running = !running;
+    startBtn.textContent = running ? "Pause" : "Start";
+    if (running) { startT = performance.now(); raf = requestAnimationFrame(tick); }
+    else { bank += performance.now() - startT; cancelAnimationFrame(raf); }
+  };
+  lapBtn.onclick = () => {
+    if (!running) return;
+    laps.unshift(fmt(bank + performance.now() - startT));
+    list.innerHTML = laps.slice(0, 8).map((l, i) => `<div class="kv"><span>Lap ${laps.length - i}</span><span>${l}</span></div>`).join("");
+  };
+  resetBtn.onclick = () => { running = false; startBtn.textContent = "Start"; bank = 0; laps = []; disp.textContent = "00:00.00"; list.innerHTML = ""; cancelAnimationFrame(raf); };
+  box.append(disp, el("div", ""), startBtn, lapBtn, resetBtn, el("label", "Laps"), list);
+},
+
+/* --- Day 16: hangman (simplified word game) --- */
+hangman(box) {
+  const WORDS = ["CODE", "GOLD", "STREAK", "BUILDER"];
+  let word, guessed, misses;
+  const disp = el("div", ""), msg = el("div", ""), keys = el("div", "");
+  const solved = () => word.split("").every(c => guessed.has(c));
+  const draw = () => {
+    disp.innerHTML = `<div style="font-size:2rem;letter-spacing:.5rem;color:var(--gold);font-weight:800">${word.split("").map(c => guessed.has(c) ? c : "_").join(" ")}</div>`;
+    msg.innerHTML = `<p>Misses: ${misses} / 6</p>`;
+  };
+  const guess = (ch, btn) => {
+    if (guessed.has(ch) || misses >= 6 || solved()) return;
+    guessed.add(ch);
+    if (word.includes(ch)) btn.style.borderColor = "var(--gold)";
+    else { misses++; btn.style.opacity = ".3"; }
+    draw();
+    if (!solved() && misses < 6) return;
+    const again = el("button", "New word"); again.className = "dbtn"; again.style.marginTop = "8px";
+    again.onclick = newGame;
+    msg.innerHTML = `<p style="color:var(--gold)">${solved() ? "You got it!" : "Out of guesses — the word was " + word + "."}</p>`;
+    msg.append(again);
+  };
+  const newGame = () => {
+    word = WORDS[Math.floor(Math.random() * WORDS.length)];
+    guessed = new Set(); misses = 0;
+    keys.innerHTML = "";
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach(ch => {
+      const b = el("button", ch);
+      b.className = "dbtn ghost"; b.style.cssText = "min-width:2.1rem;padding:4px;margin:2px";
+      b.onclick = () => guess(ch, b);
+      keys.append(b);
+    });
+    draw();
+  };
+  keys.style.cssText = "max-width:340px;margin-top:8px";
+  box.append(disp, msg, keys);
+  newGame();
+},
 
 /* --- Day 13: simon game --- */
 simon(box) {
