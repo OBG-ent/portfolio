@@ -103,6 +103,8 @@ footer a{color:var(--gold)}
    {day, name, url, description, tech:[], highlight, demo}
    ============================================================ */
 const PROJECTS = [
+{day:"Day 17",name:"ascii-art-generator",url:"https://github.com/OBG-ent/day-17-ascii-art-generator",description:"Python CLI that turns any text into big block-letter ASCII banners — custom draw character, borders, and file export (browser simulation here).",tech:["Python","JavaScript"],highlight:"A real mini font engine — dictionary-based glyph rendering over A–Z, 0–9, and punctuation.",demo:"ascii"},
+{day:"Day 17",name:"markdown-notes-app",url:"https://github.com/OBG-ent/day-17-markdown-notes-app",description:"Zero-backend notes app with live markdown preview, search, tags, pins, export, and dark mode — everything saves to the browser.",tech:["JavaScript","HTML","CSS"],highlight:"A hand-rolled markdown parser plus debounced auto-save — no libraries, no build step, no backend.",demo:"markdown"},
 {day:"Day 16",name:"stopwatch",url:"https://github.com/OBG-ent/day-16-stopwatch",description:"Millisecond-precision stopwatch with lap tracking, fastest/slowest lap highlights, live stats, and keyboard shortcuts — all in a single HTML file.",tech:["JavaScript","HTML","CSS"],highlight:"Drift-free timing: performance.now() plus an accumulated time bank, because setInterval alone drifts.",demo:"stopwatch"},
 {day:"Day 16",name:"hangman-game",url:"https://github.com/OBG-ent/day-16-hangman-game",description:"The classic word game rebuilt with an animated SVG figure, 96 words across 4 categories and 3 difficulties, hints, scoring, and streaks (simplified demo here).",tech:["JavaScript","HTML","CSS"],highlight:"Clean game state management — a Set for O(1) guessed-letter lookups and localStorage for the best streak.",demo:"hangman"},
 {day:"Day 15",name:"morse-code-translator",url:"https://github.com/OBG-ent/day-15-morse-code-translator",description:"Type a message, get dots and dashes — decodes morse back to text too, and plays it as classic radio beeps.",tech:["JavaScript","HTML","CSS"],highlight:"Regex auto-detects what you typed, and the Web Audio API schedules the beeps with real morse timing.",demo:"morse"},
@@ -1120,6 +1122,75 @@ fileorganizer(box) {
   undo.onclick = () => { render("python main.py undo\n\nRestored " + files.length + " file(s) to their original locations."); out.innerHTML = `<p style="color:var(--muted);font-size:.88rem">All moved files restored from the move-log — the safety net that makes the real tool trustworthy.</p>`; run.disabled = true; undo.disabled = true; };
   reset.onclick = () => { render("python main.py organize ~/Downloads"); run.disabled = false; undo.disabled = true; };
   box.append(el("label", "File organizer — dry-run a cleanup, then undo it"), run, undo, reset, log, out);
+},
+
+/* --- Day 17: ascii art generator (3-row block font) --- */
+ascii(box) {
+  const FONT = {
+    "A":[" ### ","#   #","#####"],"B":["#### ","#   #","#### "],"C":[" ####","#    "," ####"],"D":["#### ","#   #","#### "],
+    "E":["#####","#    ","#####"],"F":["#####","#    ","#    "],"G":[" ####","#  ##"," ####"],"H":["#   #","#####","#   #"],
+    "I":[" ### ","  #  "," ### "],"J":["  ###","   # ","## # "],"K":["#   #","##  ","#   #"],"L":["#    ","#    ","#####"],
+    "M":["#   #","#####","#   #"],"N":["#   #","## ##","#   #"],"O":[" ### ","#   #"," ### "],"P":["#### ","#### ","#    "],
+    "Q":[" ### ","#   #"," ## #"],"R":["#### ","## # ","#  # "],"S":[" ####"," ### ","#### "],"T":["#####","  #  ","  #  "],
+    "U":["#   #","#   #"," ### "],"V":["#   #","#   #"," # # "],"W":["#   #","#####","#####"],"X":["#   #"," ### ","#   #"],
+    "Y":["#   #"," ### ","  #  "],"Z":["#####"," ### ","#####"],
+    "0":[" ### ","# # #"," ### "],"1":["  #  ","  #  ","  #  "],"2":["#### "," ### ","#####"],"3":["#### "," ### ","#### "],
+    "4":["#   #","#####","   # "],"5":["#####","#### ","#### "],"6":[" ####","#### ","#### "],"7":["#####","  #  ","  #  "],
+    "8":[" ### "," ### "," ### "],"9":[" ### "," ### "," ####"]," ":["   ","   ","   "],
+    ".":["   ","   "," # "],"!":[" #  "," #  "," #  "],"?":["#### "," ### "," #  "],"-":["   ","#####","   "]
+  };
+  const inp = el("input"); inp.value = "DAY 17";
+  inp.style.cssText = "padding:8px 10px;border-radius:6px;border:1px solid var(--gold);background:#111;color:#fff;width:100%;box-sizing:border-box";
+  const pre = el("pre", "");
+  pre.style.cssText = "background:#0d0d0d;border-radius:8px;padding:12px;font-size:.8rem;color:var(--gold);white-space:pre;overflow-x:auto;margin:10px 0;font-family:monospace;line-height:1.3";
+  const draw = () => {
+    const rows = ["", "", ""];
+    for (const ch of inp.value.toUpperCase()) { const g = FONT[ch] || FONT["?"]; for (let r = 0; r < 3; r++) rows[r] += g[r] + " "; }
+    pre.textContent = rows.join("\n");
+  };
+  inp.addEventListener("input", draw); draw();
+  box.append(el("label", "Type something — get instant block-letter banners"), inp, pre);
+},
+
+/* --- Day 17: markdown notes (live mini parser) --- */
+markdown(box) {
+  const ta = el("textarea");
+  ta.value = "# Hello 👋\n\nType **markdown** here and watch it render.\n\n- live preview\n- no backend\n- `just plain JS`";
+  ta.style.cssText = "width:100%;box-sizing:border-box;min-height:90px;padding:8px 10px;border-radius:6px;border:1px solid var(--gold);background:#111;color:#fff;font-family:monospace;font-size:.85rem";
+  const prev = el("div", "");
+  prev.style.cssText = "border:1px solid #333;border-radius:8px;padding:12px;margin:10px 0;min-height:60px;background:#0d0d0d";
+  const stats = el("p", "");
+  stats.style.cssText = "color:var(--muted);font-size:.8rem;margin:0";
+  const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const inline = t => t
+    .replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>")
+    .replace(/~~([^~]+)~~/g, "<s>$1</s>")
+    .replace(/`([^`]+)`/g, "<code>$1</code>")
+    .replace(/\*([^*]+)\*/g, "<i>$1</i>")
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  const render = () => {
+    const lines = esc(ta.value).split("\n");
+    let html = "", inList = false;
+    const close = () => { if (inList) { html += "</ul>"; inList = false; } };
+    for (const ln of lines) {
+      if (/^### /.test(ln)) { close(); html += "<h4>" + inline(ln.slice(4)) + "</h4>"; }
+      else if (/^## /.test(ln)) { close(); html += "<h3>" + inline(ln.slice(3)) + "</h3>"; }
+      else if (/^# /.test(ln)) { close(); html += "<h2>" + inline(ln.slice(2)) + "</h2>"; }
+      else if (/^&gt; /.test(ln)) { close(); html += "<blockquote>" + inline(ln.slice(5)) + "</blockquote>"; }
+      else if (/^[-*] /.test(ln)) { if (!inList) { html += "<ul>"; inList = true; } html += "<li>" + inline(ln.slice(2)) + "</li>"; }
+      else if (!ln.trim()) { close(); }
+      else { close(); html += "<p>" + inline(ln) + "</p>"; }
+    }
+    close();
+    prev.innerHTML = html;
+    Array.from(prev.querySelectorAll("h2,h3,h4")).forEach(h => { h.style.color = "var(--gold)"; h.style.margin = "6px 0"; });
+    Array.from(prev.querySelectorAll("blockquote")).forEach(b => { b.style.cssText = "border-left:3px solid var(--gold);margin:6px 0;padding:2px 10px;color:var(--muted)"; });
+    const w = ta.value.trim().split(/\s+/).filter(Boolean).length;
+    stats.textContent = w + (w === 1 ? " word" : " words") + " — live, like the real app's debounced auto-save";
+  };
+  let to; ta.addEventListener("input", () => { clearTimeout(to); to = setTimeout(render, 250); render(); });
+  render();
+  box.append(el("label", "Live markdown preview — a hand-rolled parser, no libraries"), ta, prev, stats);
 }
 };
 
