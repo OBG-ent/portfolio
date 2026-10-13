@@ -103,6 +103,8 @@ footer a{color:var(--gold)}
    {day, name, url, description, tech:[], highlight, demo}
    ============================================================ */
 const PROJECTS = [
+{day:"Day 18",name:"decision-maker",url:"https://github.com/OBG-ent/day-18-decision-maker",description:"Can't decide? Type your options, spin the wheel of fate, and let it crown a winner — with a running history of past verdicts (simplified demo here).",tech:["JavaScript","HTML","CSS"],highlight:"Input parsing done cleanly — duplicates auto-removed, and the spin reveal is a setTimeout synced to a CSS animation.",demo:"decision"},
+{day:"Day 18",name:"game-of-life",url:"https://github.com/OBG-ent/day-18-game-of-life",description:"Conway's famous cellular automaton — paint living cells on a drawable grid, load legendary presets (Glider, Pulsar, Gosper Glider Gun), and watch generations evolve.",tech:["JavaScript","Canvas","HTML","CSS"],highlight:"Simulation fundamentals — a 2D-array board, neighbor counting with toroidal edge wrapping, and canvas rendering.",demo:"gol"},
 {day:"Day 17",name:"ascii-art-generator",url:"https://github.com/OBG-ent/day-17-ascii-art-generator",description:"Python CLI that turns any text into big block-letter ASCII banners — custom draw character, borders, and file export (browser simulation here).",tech:["Python","JavaScript"],highlight:"A real mini font engine — dictionary-based glyph rendering over A–Z, 0–9, and punctuation.",demo:"ascii"},
 {day:"Day 17",name:"markdown-notes-app",url:"https://github.com/OBG-ent/day-17-markdown-notes-app",description:"Zero-backend notes app with live markdown preview, search, tags, pins, export, and dark mode — everything saves to the browser.",tech:["JavaScript","HTML","CSS"],highlight:"A hand-rolled markdown parser plus debounced auto-save — no libraries, no build step, no backend.",demo:"markdown"},
 {day:"Day 16",name:"stopwatch",url:"https://github.com/OBG-ent/day-16-stopwatch",description:"Millisecond-precision stopwatch with lap tracking, fastest/slowest lap highlights, live stats, and keyboard shortcuts — all in a single HTML file.",tech:["JavaScript","HTML","CSS"],highlight:"Drift-free timing: performance.now() plus an accumulated time bank, because setInterval alone drifts.",demo:"stopwatch"},
@@ -1191,6 +1193,72 @@ markdown(box) {
   let to; ta.addEventListener("input", () => { clearTimeout(to); to = setTimeout(render, 250); render(); });
   render();
   box.append(el("label", "Live markdown preview — a hand-rolled parser, no libraries"), ta, prev, stats);
+},
+
+/* --- Day 18: decision maker --- */
+decision(box) {
+  const ta = el("textarea"), pick = el("button", "🎲 Pick for me"), res = el("div", "");
+  ta.value = "Pizza\nSushi\nTacos\nBurger";
+  ta.style.cssText = "width:100%;box-sizing:border-box;min-height:80px;padding:8px 10px;border-radius:6px;border:1px solid var(--gold);background:#111;color:#fff;font-family:monospace;font-size:.85rem";
+  pick.className = "dbtn";
+  res.style.cssText = "font-size:1.6rem;font-weight:800;color:var(--gold);margin:12px 0;min-height:44px;text-align:center";
+  pick.onclick = () => {
+    const opts = [...new Set(ta.value.split("\n").map(s => s.trim()).filter(Boolean))];
+    if (!opts.length) { res.textContent = "Add some options first!"; return; }
+    let n = 0;
+    const t = setInterval(() => {
+      if (++n >= 12) { clearInterval(t); res.textContent = "🏆 " + opts[Math.floor(Math.random() * opts.length)]; }
+      else res.textContent = opts[Math.floor(Math.random() * opts.length)];
+    }, 70);
+  };
+  box.append(el("label", "Decision maker — one option per line, then spin fate"), ta, pick, res);
+},
+
+/* --- Day 18: game of life --- */
+gol(box) {
+  const COLS = 28, ROWS = 18, CELL = 10;
+  const cv = el("canvas"), ctx = cv.getContext("2d");
+  cv.width = COLS * CELL; cv.height = ROWS * CELL; cv.className = "dcanvas";
+  cv.style.cursor = "pointer";
+  let grid = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+  let timer = null, gen = 0;
+  const info = el("div", "");
+  info.style.cssText = "color:var(--muted);font-size:.85rem;margin:8px 0";
+  function draw() {
+    ctx.fillStyle = "#0d0d0d"; ctx.fillRect(0, 0, cv.width, cv.height);
+    ctx.fillStyle = "#d4af37";
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++)
+      if (grid[r][c]) ctx.fillRect(c * CELL + 1, r * CELL + 1, CELL - 2, CELL - 2);
+  }
+  function step() {
+    const next = grid.map((row, r) => row.map((v, c) => {
+      let n = 0;
+      for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+        if (!dr && !dc) continue;
+        n += grid[(r + dr + ROWS) % ROWS][(c + dc + COLS) % COLS];
+      }
+      return (v && (n === 2 || n === 3)) || (!v && n === 3) ? 1 : 0;
+    }));
+    grid = next; gen++; draw();
+    info.textContent = "Generation " + gen + " — " + grid.flat().reduce((a, b) => a + b, 0) + " live cells";
+  }
+  function stop() { if (timer) { clearInterval(timer); timer = null; play.textContent = "▶ Play"; } }
+  const play = el("button", "▶ Play"), stp = el("button", "Step"), rnd = el("button", "🎲 Randomize"), clr = el("button", "🧹 Clear");
+  [play, stp, rnd, clr].forEach(b => { b.className = "dbtn ghost"; b.style.margin = "4px"; });
+  play.onclick = () => { if (timer) { stop(); } else { play.textContent = "⏸ Pause"; timer = setInterval(step, 160); } };
+  stp.onclick = () => { stop(); step(); };
+  rnd.onclick = () => { stop(); randomize(); };
+  clr.onclick = () => { stop(); grid = grid.map(row => row.map(() => 0)); gen = 0; draw(); info.textContent = "Generation 0 — cleared, click the grid to draw"; };
+  function randomize() { grid = grid.map(row => row.map(() => Math.random() < 0.28 ? 1 : 0)); gen = 0; draw(); info.textContent = "Generation 0 — random soup served"; }
+  cv.onclick = e => {
+    const rect = cv.getBoundingClientRect();
+    const c = Math.floor((e.clientX - rect.left) / rect.width * COLS);
+    const r = Math.floor((e.clientY - rect.top) / rect.height * ROWS);
+    grid[r][c] = grid[r][c] ? 0 : 1; draw();
+  };
+  randomize();
+  const ctrls = el("div", ""); ctrls.append(play, stp, rnd, clr);
+  box.append(el("label", "Game of Life — click cells to draw, then play"), cv, info, ctrls);
 }
 };
 
