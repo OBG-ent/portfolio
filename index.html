@@ -103,6 +103,8 @@ footer a{color:var(--gold)}
    {day, name, url, description, tech:[], highlight, demo}
    ============================================================ */
 const PROJECTS = [
+{day:"Day 19",name:"bmi-calculator",url:"https://github.com/OBG-ent/day-19-bmi-calculator",description:"Know your number in under 10 seconds — a clean, mobile-friendly BMI calculator with metric/imperial toggle and a color-coded health scale (simplified demo here).",tech:["JavaScript","HTML","CSS"],highlight:"Conditional styling on computed values — the color-coded scale turns a formula into an answer you feel.",demo:"bmi"},
+{day:"Day 19",name:"whack-a-mole-game",url:"https://github.com/OBG-ent/day-19-whack-a-mole-game",description:"Test your reflexes — bonk the moles before they vanish, beat the clock, and chase your high score (simplified demo here).",tech:["JavaScript","HTML","CSS"],highlight:"setInterval game loop, random spawn selection, and localStorage for a persistent high score.",demo:"whack"},
 {day:"Day 18",name:"decision-maker",url:"https://github.com/OBG-ent/day-18-decision-maker",description:"Can't decide? Type your options, spin the wheel of fate, and let it crown a winner — with a running history of past verdicts (simplified demo here).",tech:["JavaScript","HTML","CSS"],highlight:"Input parsing done cleanly — duplicates auto-removed, and the spin reveal is a setTimeout synced to a CSS animation.",demo:"decision"},
 {day:"Day 18",name:"game-of-life",url:"https://github.com/OBG-ent/day-18-game-of-life",description:"Conway's famous cellular automaton — paint living cells on a drawable grid, load legendary presets (Glider, Pulsar, Gosper Glider Gun), and watch generations evolve.",tech:["JavaScript","Canvas","HTML","CSS"],highlight:"Simulation fundamentals — a 2D-array board, neighbor counting with toroidal edge wrapping, and canvas rendering.",demo:"gol"},
 {day:"Day 17",name:"ascii-art-generator",url:"https://github.com/OBG-ent/day-17-ascii-art-generator",description:"Python CLI that turns any text into big block-letter ASCII banners — custom draw character, borders, and file export (browser simulation here).",tech:["Python","JavaScript"],highlight:"A real mini font engine — dictionary-based glyph rendering over A–Z, 0–9, and punctuation.",demo:"ascii"},
@@ -1259,6 +1261,67 @@ gol(box) {
   randomize();
   const ctrls = el("div", ""); ctrls.append(play, stp, rnd, clr);
   box.append(el("label", "Game of Life — click cells to draw, then play"), cv, info, ctrls);
+},
+
+/* --- Day 19: BMI calculator --- */
+bmi(box) {
+  const hIn = el("input"), wIn = el("input"), calc = el("button", "Calculate"), res = el("div", "");
+  hIn.placeholder = "Height (cm)"; wIn.placeholder = "Weight (kg)";
+  [hIn, wIn].forEach(i => { i.className = "din"; i.type = "number"; i.style.margin = "4px"; i.style.width = "120px"; });
+  calc.className = "dbtn";
+  res.style.cssText = "margin:12px 0;font-size:1.4rem;font-weight:800;min-height:60px;text-align:center";
+  calc.onclick = () => {
+    const h = parseFloat(hIn.value), w = parseFloat(wIn.value);
+    if (!h || !w || h <= 0 || w <= 0) { res.textContent = "Enter a valid height and weight"; res.style.color = "#fff"; return; }
+    const v = w / Math.pow(h / 100, 2);
+    const [label, color] = v < 18.5 ? ["Underweight", "#5bc0de"] : v < 25 ? ["Healthy", "#5cb85c"] : v < 30 ? ["Overweight", "#f0ad4e"] : ["Obese", "#d9534f"];
+    res.innerHTML = `BMI <span style="color:${color}">${v.toFixed(1)}</span> — <span style="color:${color}">${label}</span>`;
+  };
+  box.append(el("label", "Metric BMI calculator"), hIn, wIn, calc, res);
+},
+
+/* --- Day 19: whack-a-mole (simplified) --- */
+whack(box) {
+  const N = 6;
+  const board = el("div", "");
+  board.style.cssText = "display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0";
+  const holes = [];
+  for (let i = 0; i < N; i++) {
+    const h = el("div", "🕳️");
+    h.style.cssText = "font-size:2.2rem;text-align:center;padding:10px;border-radius:8px;background:#111;cursor:pointer;user-select:none";
+    holes.push(h); board.append(h);
+  }
+  const start = el("button", "Start"), score = el("div", "Score: 0"), time = el("div", "");
+  start.className = "dbtn";
+  time.style.cssText = "color:var(--muted);font-size:.9rem;margin:6px 0";
+  let s = 0, t = 20, mole = -1, spawnT = null, countT = null;
+  const best = parseInt(localStorage.getItem("portfolio-whack-best") || "0");
+  const bestLine = el("div", "Best: " + best);
+  bestLine.style.cssText = "color:var(--gold);font-weight:700;margin-bottom:6px";
+  function place() {
+    holes.forEach(h => h.textContent = "🕳️");
+    mole = Math.floor(Math.random() * N);
+    holes[mole].textContent = "🐹";
+  }
+  function end() {
+    clearInterval(spawnT); clearInterval(countT);
+    holes.forEach(h => h.textContent = "🕳️");
+    time.textContent = "Time's up! Final score: " + s;
+    if (s > best) { localStorage.setItem("portfolio-whack-best", String(s)); bestLine.textContent = "Best: " + s; }
+    start.textContent = "Play again";
+  }
+  holes.forEach((h, i) => h.onclick = () => {
+    if (!spawnT) return;
+    if (i === mole) { s++; score.textContent = "Score: " + s; holes[mole].textContent = "💥"; mole = -1; }
+  });
+  start.onclick = () => {
+    clearInterval(spawnT); clearInterval(countT);
+    s = 0; t = 20; score.textContent = "Score: 0"; start.textContent = "Start";
+    place(); time.textContent = "Time: 20s";
+    spawnT = setInterval(place, 800);
+    countT = setInterval(() => { if (--t <= 0) end(); else time.textContent = "Time: " + t + "s"; }, 1000);
+  };
+  box.append(el("label", "Click the mole before it hops away"), bestLine, board, score, time, start);
 }
 };
 
