@@ -103,6 +103,8 @@ footer a{color:var(--gold)}
    {day, name, url, description, tech:[], highlight, demo}
    ============================================================ */
 const PROJECTS = [
+{day:"Day 20",name:"json-formatter",url:"https://github.com/OBG-ent/day-20-json-formatter",description:"Paste messy JSON and get pretty syntax-highlighted output — with minify, sample data, a copy button, and a Ctrl+Enter shortcut (simplified demo here).",tech:["JavaScript","HTML","CSS"],highlight:"Real dev tooling — JSON.parse for validation with helpful errors, plus a tiny tokenizer for syntax highlighting.",demo:"jsonfmt"},
+{day:"Day 20",name:"connect-four-game",url:"https://github.com/OBG-ent/day-20-connect-four-game",description:"The classic drop-a-disc duel — an Easy/Medium/Hard minimax AI, animated drops, glowing win discs, and a persistent scoreboard (simplified 2-player demo here).",tech:["JavaScript","HTML","CSS"],highlight:"AI fundamentals in a game — minimax with alpha-beta pruning, and win detection across all four axes.",demo:"c4"},
 {day:"Day 19",name:"bmi-calculator",url:"https://github.com/OBG-ent/day-19-bmi-calculator",description:"Know your number in under 10 seconds — a clean, mobile-friendly BMI calculator with metric/imperial toggle and a color-coded health scale (simplified demo here).",tech:["JavaScript","HTML","CSS"],highlight:"Conditional styling on computed values — the color-coded scale turns a formula into an answer you feel.",demo:"bmi"},
 {day:"Day 19",name:"whack-a-mole-game",url:"https://github.com/OBG-ent/day-19-whack-a-mole-game",description:"Test your reflexes — bonk the moles before they vanish, beat the clock, and chase your high score (simplified demo here).",tech:["JavaScript","HTML","CSS"],highlight:"setInterval game loop, random spawn selection, and localStorage for a persistent high score.",demo:"whack"},
 {day:"Day 18",name:"decision-maker",url:"https://github.com/OBG-ent/day-18-decision-maker",description:"Can't decide? Type your options, spin the wheel of fate, and let it crown a winner — with a running history of past verdicts (simplified demo here).",tech:["JavaScript","HTML","CSS"],highlight:"Input parsing done cleanly — duplicates auto-removed, and the spin reveal is a setTimeout synced to a CSS animation.",demo:"decision"},
@@ -1322,6 +1324,110 @@ whack(box) {
     countT = setInterval(() => { if (--t <= 0) end(); else time.textContent = "Time: " + t + "s"; }, 1000);
   };
   box.append(el("label", "Click the mole before it hops away"), bestLine, board, score, time, start);
+},
+
+/* --- Day 20: json-formatter (simplified) --- */
+jsonfmt(box) {
+  const ta = el("textarea", "");
+  ta.className = "din"; ta.style.cssText = "width:100%;height:90px;font-family:monospace;font-size:.8rem;margin:4px 0";
+  ta.value = '{"name":"Reynold","streak":20,"tools":["html","css","js"],"shipping":true}';
+  const fmtBtn = el("button", "Format"), minBtn = el("button", "Minify"), out = el("pre", "");
+  fmtBtn.className = "dbtn"; minBtn.className = "dbtn ghost";
+  [fmtBtn, minBtn].forEach(b => b.style.margin = "4px");
+  out.style.cssText = "background:#0a0a0a;border:1px solid #333;border-radius:8px;padding:10px;font-size:.8rem;font-family:monospace;min-height:80px;max-height:220px;overflow:auto;white-space:pre-wrap;margin:8px 0";
+  const paint = json => {
+    const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+    return esc(json).replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*")(\s*:)?|\b(true|false|null)\b|-?\d+(\.\d+)?([eE][+-]?\d+)?/g, m => {
+      let c = "#e06c75"; // string
+      if (/^"/.test(m)) c = /:$/.test(m) ? "#c678dd" : "#98c379"; // key : string
+      else if (/true|false/.test(m)) c = "#56b6c2"; // boolean
+      else if (/null/.test(m)) c = "#d19a66"; // null
+      else c = "#d19a66"; // number
+      return `<span style="color:${c}">${m}</span>`;
+    });
+  };
+  const run = pretty => {
+    try {
+      const obj = JSON.parse(ta.value);
+      out.innerHTML = paint(pretty ? JSON.stringify(obj, null, 2) : JSON.stringify(obj));
+    } catch (e) { out.innerHTML = `<span style="color:#e06c75">Invalid JSON: ${e.message.replace(/</g, "&lt;")}</span>`; }
+  };
+  fmtBtn.onclick = () => run(true);
+  minBtn.onclick = () => run(false);
+  ta.addEventListener("keydown", e => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) run(true); });
+  box.append(el("label", "Paste JSON, hit Format (Ctrl+Enter works too)"), ta, fmtBtn, minBtn, out);
+  run(true);
+},
+
+/* --- Day 20: connect-four (simplified, 2 players + random CPU) --- */
+c4(box) {
+  const COLS = 7, ROWS = 6, EMPTY = 0, P1 = 1, P2 = 2;
+  let grid = Array.from({ length: ROWS }, () => Array(COLS).fill(EMPTY));
+  let turn = P1, over = false, vsCPU = true;
+  const status = el("div", ""), board = el("div", ""), reset = el("button", "New game");
+  const modeBtn = el("button", "CPU: ON");
+  reset.className = "dbtn"; modeBtn.className = "dbtn ghost";
+  reset.style.margin = modeBtn.style.margin = "4px";
+  status.style.cssText = "margin:6px 0;font-weight:700";
+  board.style.cssText = "display:grid;grid-template-columns:repeat(7,1fr);gap:6px;background:#0b3d91;border-radius:10px;padding:10px;max-width:420px;margin:8px 0";
+  const cells = [];
+  const draw = winCells => {
+    board.innerHTML = ""; cells.length = 0;
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+      const d = el("div", "");
+      let col = "#0a0a0a";
+      if (grid[r][c] === P1) col = "#e63946";
+      if (grid[r][c] === P2) col = "#ffd60a";
+      d.style.cssText = `width:100%;aspect-ratio:1;border-radius:50%;background:${col};cursor:pointer;border:2px solid #111`;
+      if (winCells && winCells.some(([wr, wc]) => wr === r && wc === c)) d.style.boxShadow = "0 0 12px #fff";
+      d.onclick = () => play(c);
+      board.append(d); cells.push(d);
+    }
+  };
+  const dirs = [[0, 1], [1, 0], [1, 1], [1, -1]];
+  const inB = (r, c) => r >= 0 && r < ROWS && c >= 0 && c < COLS;
+  const winner = () => {
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+      const p = grid[r][c]; if (!p) continue;
+      for (const [dr, dc] of dirs) {
+        const cells4 = [[r, c]];
+        for (let k = 1; k < 4; k++) cells4.push([r + dr * k, c + dc * k]);
+        if (cells4.every(([wr, wc]) => inB(wr, wc) && grid[wr][wc] === p)) return { p, cells: cells4 };
+      }
+    }
+    return grid[0].every(v => v !== EMPTY) ? { p: 0, cells: [] } : null;
+  };
+  const cpuMove = () => {
+    const open = [];
+    for (let c = 0; c < COLS; c++) if (grid[0][c] === EMPTY) open.push(c);
+    return open.length ? open[Math.floor(Math.random() * open.length)] : -1;
+  };
+  const finish = w => {
+    over = true;
+    draw(w.cells);
+    status.innerHTML = w.p === 0 ? "It's a draw!" : (w.p === P1 ? "🔴 Player 1 wins!" : "🟡 " + (vsCPU ? "CPU" : "Player 2") + " wins!");
+  };
+  function play(c) {
+    if (over) return;
+    let placed = false;
+    for (let r = ROWS - 1; r >= 0; r--) if (grid[r][c] === EMPTY) {
+      grid[r][c] = turn; placed = true; break;
+    }
+    if (!placed) return;
+    let w = winner();
+    if (w) { finish(w); return; }
+    turn = turn === P1 ? P2 : P1;
+    status.textContent = turn === P1 ? "🔴 Player 1 to move" : "🟡 " + (vsCPU ? "CPU thinking…" : "Player 2 to move");
+    draw();
+    if (vsCPU && turn === P2 && !over) setTimeout(() => { play(cpuMove()); }, 450);
+  }
+  modeBtn.onclick = () => { vsCPU = !vsCPU; modeBtn.textContent = "CPU: " + (vsCPU ? "ON" : "OFF"); reset.onclick(); };
+  reset.onclick = () => {
+    grid = Array.from({ length: ROWS }, () => Array(COLS).fill(EMPTY));
+    turn = P1; over = false; status.textContent = "🔴 Player 1 to move"; draw();
+  };
+  box.append(el("label", "Click a column to drop your disc — connect four to win"), status, board, reset, modeBtn);
+  draw(); status.textContent = "🔴 Player 1 to move";
 }
 };
 
