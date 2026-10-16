@@ -103,6 +103,8 @@ footer a{color:var(--gold)}
    {day, name, url, description, tech:[], highlight, demo}
    ============================================================ */
 const PROJECTS = [
+{day:"Day 21",name:"sleep-calculator",url:"https://github.com/OBG-ent/day-21-sleep-calculator",description:"Wake up refreshed — enter your alarm time and get the best bedtimes lined up with full 90-minute sleep cycles (try the simplified demo below).",tech:["JavaScript","HTML","CSS"],highlight:"Date/time arithmetic with a human payoff — walks the clock backwards across midnight without breaking.",demo:"sleep"},
+{day:"Day 21",name:"piano-keyboard",url:"https://github.com/OBG-ent/day-21-piano-keyboard",description:"A playable piano right in the browser — tap the keys (or your keyboard) to play real synthesized notes across two octaves.",tech:["JavaScript","HTML","CSS","Web Audio API"],highlight:"Frequency math meets sound — each key maps to its exact equal-temperament frequency, synthesized live with oscillators.",demo:"piano"},
 {day:"Day 20",name:"json-formatter",url:"https://github.com/OBG-ent/day-20-json-formatter",description:"Paste messy JSON and get pretty syntax-highlighted output — with minify, sample data, a copy button, and a Ctrl+Enter shortcut (simplified demo here).",tech:["JavaScript","HTML","CSS"],highlight:"Real dev tooling — JSON.parse for validation with helpful errors, plus a tiny tokenizer for syntax highlighting.",demo:"jsonfmt"},
 {day:"Day 20",name:"connect-four-game",url:"https://github.com/OBG-ent/day-20-connect-four-game",description:"The classic drop-a-disc duel — an Easy/Medium/Hard minimax AI, animated drops, glowing win discs, and a persistent scoreboard (simplified 2-player demo here).",tech:["JavaScript","HTML","CSS"],highlight:"AI fundamentals in a game — minimax with alpha-beta pruning, and win detection across all four axes.",demo:"c4"},
 {day:"Day 19",name:"bmi-calculator",url:"https://github.com/OBG-ent/day-19-bmi-calculator",description:"Know your number in under 10 seconds — a clean, mobile-friendly BMI calculator with metric/imperial toggle and a color-coded health scale (simplified demo here).",tech:["JavaScript","HTML","CSS"],highlight:"Conditional styling on computed values — the color-coded scale turns a formula into an answer you feel.",demo:"bmi"},
@@ -1428,6 +1430,71 @@ c4(box) {
   };
   box.append(el("label", "Click a column to drop your disc — connect four to win"), status, board, reset, modeBtn);
   draw(); status.textContent = "🔴 Player 1 to move";
+},
+
+/* --- Day 21: sleep-calculator --- */
+sleep(box) {
+  const wake = el("input"); wake.type = "time"; wake.value = "07:00"; wake.className = "din"; wake.style.margin = "4px";
+  const btn = el("button", "Show my bedtimes"); btn.className = "dbtn"; btn.style.margin = "4px";
+  const out = el("div", "");
+  out.style.cssText = "margin:10px 0;line-height:1.7";
+  const fmt = mins => {
+    const m = ((mins % 1440) + 1440) % 1440;
+    const h = Math.floor(m / 60), mm = m % 60;
+    const ap = h >= 12 ? "PM" : "AM", h12 = h % 12 === 0 ? 12 : h % 12;
+    return h12 + ":" + String(mm).padStart(2, "0") + " " + ap;
+  };
+  btn.onclick = () => {
+    if (!wake.value) { out.textContent = "Pick a wake-up time first"; return; }
+    const [h, m] = wake.value.split(":").map(Number);
+    const wakeMins = h * 60 + m;
+    let html = "<b style=\"color:var(--gold)\">To wake at " + fmt(wakeMins) + ", sleep at…</b><br>";
+    [6, 5, 4, 3].forEach((cycles, i) => {
+      const bed = wakeMins - cycles * 90 - 15; // +15 min to fall asleep
+      const tag = i === 0 ? " 💤 best" : i === 1 ? " ✅ good" : " 😐 ok";
+      html += `<span style="font-family:monospace;font-size:1.05rem">${fmt(bed)}</span><span style="color:var(--muted);font-size:.85rem"> (${cycles} cycles)${tag}</span><br>`;
+    });
+    out.innerHTML = html;
+  };
+  box.append(el("label", "Enter your alarm — bedtimes count back in 90-minute sleep cycles"), wake, btn, out);
+  btn.onclick();
+},
+
+/* --- Day 21: piano-keyboard --- */
+piano(box) {
+  const NOTES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+  const freq = midi => 440 * Math.pow(2, (midi - 69) / 12); // equal temperament, A4 = 440 Hz
+  const row = el("div", "");
+  row.style.cssText = "position:relative;height:110px;margin:8px 0;user-select:none;touch-action:none";
+  const noteFor = midi => NOTES[midi % 12] + (Math.floor(midi / 12) - 1);
+  const whiteLeft = { 60: 0, 62: 44, 64: 88, 65: 132, 67: 176, 69: 220, 71: 264 };
+  const blackLeft = { 61: 31, 63: 75, 66: 119, 68: 163, 70: 207 }; // straddling white-key boundaries, minus half width
+  for (let midi = 60; midi <= 71; midi++) { // C4 → B4
+    const n = noteFor(midi), isBlack = n.includes("#");
+    const k = el("div", "");
+    if (isBlack) {
+      k.style.cssText = "position:absolute;top:0;left:" + blackLeft[midi] + "px;width:26px;height:64px;background:#111;border:1px solid #555;border-radius:0 0 4px 4px;cursor:pointer;z-index:2;box-shadow:0 2px 4px #000";
+    } else {
+      k.style.cssText = "position:absolute;top:0;left:" + whiteLeft[midi] + "px;width:42px;height:110px;background:#f5f5f5;border:1px solid #999;border-radius:0 0 6px 6px;cursor:pointer";
+      k.innerHTML = `<span style="position:absolute;bottom:6px;left:0;right:0;text-align:center;color:#888;font-size:.65rem">${n}</span>`;
+    }
+    k.title = n;
+    k.onmousedown = () => {
+      const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      const ctx = new AC(), o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = "triangle"; o.frequency.value = freq(midi);
+      g.gain.setValueAtTime(0.0001, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.4, ctx.currentTime + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.8);
+      o.connect(g); g.connect(ctx.destination);
+      o.start(); o.stop(ctx.currentTime + 0.85);
+      setTimeout(() => ctx.close(), 1000);
+      const flash = isBlack ? "#333" : "#ffd966", orig = isBlack ? "#111" : "#f5f5f5";
+      k.style.background = flash; setTimeout(() => { k.style.background = orig; }, 120);
+    };
+    row.append(k);
+  }
+  box.append(el("label", "Click the keys — each plays its real synthesized frequency"), row);
 }
 };
 
