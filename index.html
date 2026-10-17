@@ -103,6 +103,8 @@ footer a{color:var(--gold)}
    {day, name, url, description, tech:[], highlight, demo}
    ============================================================ */
 const PROJECTS = [
+{day:"Day 22",name:"mortgage-calculator",url:"https://github.com/OBG-ent/day-22-mortgage-calculator",description:"Know your real monthly payment before you sign — enter price, down payment, rate, and term for an instant payment breakdown (simplified demo here).",tech:["JavaScript","HTML","CSS"],highlight:"Financial math in code — the fixed-rate loan formula plus month-by-month payment simulation rendered as a DOM table.",demo:"mortgage"},
+{day:"Day 22",name:"space-invaders",url:"https://github.com/OBG-ent/day-22-space-invaders",description:"The classic arcade shooter rebuilt — a descending alien fleet, destructible shields, escalating waves, and a saved high score (simplified demo here).",tech:["JavaScript","Canvas","Web Audio API"],highlight:"A full game engine in one file — requestAnimationFrame loop, AABB collision detection, and bitmap-drawn pixel sprites.",demo:"invaders"},
 {day:"Day 21",name:"sleep-calculator",url:"https://github.com/OBG-ent/day-21-sleep-calculator",description:"Wake up refreshed — enter your alarm time and get the best bedtimes lined up with full 90-minute sleep cycles (try the simplified demo below).",tech:["JavaScript","HTML","CSS"],highlight:"Date/time arithmetic with a human payoff — walks the clock backwards across midnight without breaking.",demo:"sleep"},
 {day:"Day 21",name:"piano-keyboard",url:"https://github.com/OBG-ent/day-21-piano-keyboard",description:"A playable piano right in the browser — tap the keys (or your keyboard) to play real synthesized notes across two octaves.",tech:["JavaScript","HTML","CSS","Web Audio API"],highlight:"Frequency math meets sound — each key maps to its exact equal-temperament frequency, synthesized live with oscillators.",demo:"piano"},
 {day:"Day 20",name:"json-formatter",url:"https://github.com/OBG-ent/day-20-json-formatter",description:"Paste messy JSON and get pretty syntax-highlighted output — with minify, sample data, a copy button, and a Ctrl+Enter shortcut (simplified demo here).",tech:["JavaScript","HTML","CSS"],highlight:"Real dev tooling — JSON.parse for validation with helpful errors, plus a tiny tokenizer for syntax highlighting.",demo:"jsonfmt"},
@@ -1496,6 +1498,83 @@ piano(box) {
   }
   box.append(el("label", "Click the keys — each plays its real synthesized frequency"), row);
 }
+,
+
+/* --- Day 22: mortgage calculator (simplified) --- */
+mortgage(box) {
+  const mk = (v) => { const i = el("input"); i.type = "number"; i.value = v; i.className = "din"; i.style.cssText = "margin:4px;width:104px"; return i; };
+  const price = mk(650000), down = mk(130000), rate = mk(5.5), years = mk(25);
+  const btn = el("button", "Calculate"); btn.className = "dbtn"; btn.style.margin = "4px";
+  const out = el("div", ""); out.style.cssText = "margin:10px 0;line-height:1.7";
+  const money = n => "$" + n.toLocaleString("en-US", { maximumFractionDigits: 0 });
+  const calc = () => {
+    const loan = (price.valueAsNumber || 0) - (down.valueAsNumber || 0), apr = rate.valueAsNumber || 0, n = (years.valueAsNumber || 0) * 12;
+    if (loan <= 0 || n <= 0) { out.innerHTML = `<span style="color:#e06060">Enter a positive loan and term.</span>`; return; }
+    const r = apr / 100 / 12;
+    const M = r === 0 ? loan / n : loan * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+    const total = M * n, interest = total - loan;
+    out.innerHTML = `<b style="color:var(--gold)">Monthly payment: ${money(M)}</b><br>` +
+      `<span>Loan amount: ${money(loan)} &nbsp;·&nbsp; Total paid: ${money(total)} &nbsp;·&nbsp; Total interest: <b>${money(interest)}</b></span><br>` +
+      `<span style="color:var(--muted);font-size:.85rem">Simplified demo — the full repo shows a year-by-year amortization schedule.</span>`;
+  };
+  btn.onclick = calc;
+  box.append(el("label", "Price · down payment · rate % · years — your monthly payment, instantly"), price, down, rate, years, btn, out);
+  calc();
+}
+,
+
+/* --- Day 22: space invaders (simplified) --- */
+invaders(box) {
+  const cv = el("canvas"), ctx = cv.getContext("2d");
+  cv.width = 420; cv.height = 300; cv.className = "dcanvas"; cv.tabIndex = 0;
+  const rows = 3, cols = 7;
+  let px = 190, bullets = [], alienBullets = [], aliens = [], score = 0, dir = 1, over = false, won = false, raf = null, shootCd = 0;
+  const keys = {};
+  const start = el("button", "Start"), msg = el("div", "");
+  start.className = "dbtn"; msg.style.cssText = "margin:6px 0;color:var(--gold);font-weight:700;min-height:1.4em";
+  function reset() {
+    px = 190; bullets = []; alienBullets = []; score = 0; dir = 1; over = won = false; shootCd = 0;
+    aliens = [];
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) aliens.push({ x: 40 + c * 46, y: 30 + r * 32, on: true });
+    msg.innerHTML = "";
+  }
+  cv.onkeydown = e => { keys[e.key] = true; if (e.key === " ") e.preventDefault(); };
+  cv.onkeyup = e => { keys[e.key] = false; };
+  function frame() {
+    if (!over && !won) {
+      if (keys["ArrowLeft"]) px -= 5; if (keys["ArrowRight"]) px += 5;
+      px = Math.max(10, Math.min(cv.width - 34, px));
+      if (--shootCd < 0) shootCd = 0;
+      if (keys[" "] && shootCd === 0) { bullets.push({ x: px + 11, y: cv.height - 36 }); shootCd = 18; }
+      bullets.forEach(b => { b.y -= 7; });
+      const alive = aliens.filter(a => a.on);
+      const speed = 0.6 + (rows * cols - alive.length) * 0.15;
+      let edge = false;
+      alive.forEach(a => { a.x += speed * dir; if (a.x < 10 || a.x > cv.width - 28) edge = true; });
+      if (edge) { dir *= -1; alive.forEach(a => { a.y += 14; }); }
+      if (alive.length && Math.random() < 0.03) { const a = alive[Math.floor(Math.random() * alive.length)]; alienBullets.push({ x: a.x + 9, y: a.y + 18 }); }
+      alienBullets.forEach(b => { b.y += 3.5; });
+      bullets.forEach(b => { alive.forEach(a => { if (a.on && b.x > a.x && b.x < a.x + 18 && b.y > a.y && b.y < a.y + 15) { a.on = false; b.y = -99; score += 10; } }); });
+      bullets = bullets.filter(b => b.y > -10);
+      alienBullets.forEach(b => { if (b.x > px && b.x < px + 24 && b.y > cv.height - 34) over = true; });
+      alienBullets = alienBullets.filter(b => b.y < cv.height);
+      if (alive.every(a => !a.on)) won = true;
+      else if (alive.some(a => a.on && a.y > cv.height - 54)) over = true;
+    }
+    ctx.fillStyle = "#0d0d0d"; ctx.fillRect(0, 0, cv.width, cv.height);
+    ctx.fillStyle = "#e06060";
+    aliens.forEach(a => { if (a.on) { ctx.fillRect(a.x, a.y, 18, 12); ctx.fillRect(a.x + 4, a.y + 12, 10, 3); } });
+    ctx.fillStyle = "#d4af37"; ctx.fillRect(px, cv.height - 26, 24, 14); ctx.fillRect(px + 10, cv.height - 34, 4, 8);
+    ctx.fillStyle = "#f2f2f2"; bullets.forEach(b => ctx.fillRect(b.x - 1, b.y, 3, 8));
+    ctx.fillStyle = "#e0a0a0"; alienBullets.forEach(b => ctx.fillRect(b.x - 1, b.y, 3, 8));
+    ctx.fillStyle = "#f2f2f2"; ctx.font = "13px sans-serif"; ctx.fillText("Score " + score, 12, 18);
+    if (over) msg.innerHTML = `<span style="color:#e06060">Game over — score ${score}.</span>`;
+    if (won) msg.innerHTML = `<span>You destroyed the fleet! Score ${score}.</span>`;
+    raf = requestAnimationFrame(frame);
+  }
+  start.onclick = () => { cancelAnimationFrame(raf); reset(); cv.focus(); frame(); };
+  box.append(el("p", "← → to move, Space to shoot. Click Start, then click the game to focus keys."), start, cv, msg);
+}
 };
 
 /* ---------- page render ---------- */
@@ -1526,7 +1605,7 @@ function buildChips(container, items, active, label) {
   });
 }
 const allTech = [...new Set(PROJECTS.flatMap(p => p.tech))].sort();
-const dayOrder = ["Day 15","Day 14","Day 13","Day 12","Day 11","Day 10","Day 9","Day 8","Day 7","Day 6","Day 5","Day 4","Day 3","Day 2","Day 1","Bonus"];
+const dayOrder = ["Day 22","Day 21","Day 20","Day 19","Day 18","Day 17","Day 16","Day 15","Day 14","Day 13","Day 12","Day 11","Day 10","Day 9","Day 8","Day 7","Day 6","Day 5","Day 4","Day 3","Day 2","Day 1","Bonus"];
 const allDays = [...new Set(PROJECTS.map(p => p.day))].sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b));
 buildChips(techChips, allTech, activeTech, "Filter by tech");
 buildChips(dayChips, allDays, activeDay, "Filter by day");
