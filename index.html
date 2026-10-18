@@ -103,6 +103,8 @@ footer a{color:var(--gold)}
    {day, name, url, description, tech:[], highlight, demo}
    ============================================================ */
 const PROJECTS = [
+{day:"Day 23",name:"fake-data-generator",url:"https://github.com/OBG-ent/day-23-fake-data-generator",description:"Fake users in one command — generates realistic names, emails, phones, addresses, passwords, and UUIDs for seeding databases and testing forms (simplified demo here).",tech:["Python","JavaScript"],highlight:"A genuine developer utility — argparse subcommands, seeded random output for repeatable tests, and clean one-function-per-generator design.",demo:"fakedata"},
+{day:"Day 23",name:"kanban-board",url:"https://github.com/OBG-ent/day-23-kanban-board",description:"Your tasks, three columns, zero setup — a drag-and-drop kanban board with localStorage auto-save, card editing, live counters, and a dark minimal theme.",tech:["JavaScript","HTML","CSS"],highlight:"The HTML5 drag-and-drop API in the wild — one state object, one render() repaint, and corrupted-save guards on every load.",demo:"kanban"},
 {day:"Day 22",name:"mortgage-calculator",url:"https://github.com/OBG-ent/day-22-mortgage-calculator",description:"Know your real monthly payment before you sign — enter price, down payment, rate, and term for an instant payment breakdown (simplified demo here).",tech:["JavaScript","HTML","CSS"],highlight:"Financial math in code — the fixed-rate loan formula plus month-by-month payment simulation rendered as a DOM table.",demo:"mortgage"},
 {day:"Day 22",name:"space-invaders",url:"https://github.com/OBG-ent/day-22-space-invaders",description:"The classic arcade shooter rebuilt — a descending alien fleet, destructible shields, escalating waves, and a saved high score (simplified demo here).",tech:["JavaScript","Canvas","Web Audio API"],highlight:"A full game engine in one file — requestAnimationFrame loop, AABB collision detection, and bitmap-drawn pixel sprites.",demo:"invaders"},
 {day:"Day 21",name:"sleep-calculator",url:"https://github.com/OBG-ent/day-21-sleep-calculator",description:"Wake up refreshed — enter your alarm time and get the best bedtimes lined up with full 90-minute sleep cycles (try the simplified demo below).",tech:["JavaScript","HTML","CSS"],highlight:"Date/time arithmetic with a human payoff — walks the clock backwards across midnight without breaking.",demo:"sleep"},
@@ -1574,6 +1576,84 @@ invaders(box) {
   }
   start.onclick = () => { cancelAnimationFrame(raf); reset(); cv.focus(); frame(); };
   box.append(el("p", "← → to move, Space to shoot. Click Start, then click the game to focus keys."), start, cv, msg);
+},
+
+/* --- Day 23: fake data generator (simplified) --- */
+fakedata(box) {
+  const first = ["Amara","Liam","Sofia","Noah","Zuri","Mateo","Aisha","Ethan","Yuki","Leo","Nia","Carlos","Priya","Omar","Elena","Kofi"];
+  const last = ["Silva","Okafor","Garcia","Kim","Haddad","Novak","Khan","Diallo","Tanaka","Fischer","Moyo","Rossi","Sharma","Adeyemi","Petrov","Lopez"];
+  const domains = ["example.com","mail.dev","sample.io","testmail.org"];
+  const chars = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789!@#$";
+  const sel = el("select", ["Names","Emails","Phones","Passwords","UUIDs"].map(t => `<option>${t}</option>`).join(""));
+  sel.className = "din"; sel.style.margin = "4px";
+  const btn = el("button", "Generate"); btn.className = "dbtn"; btn.style.margin = "4px";
+  const out = el("div", "");
+  out.style.cssText = "margin:10px 0;font-family:ui-monospace,monospace;font-size:.88rem;line-height:2";
+  const pick = a => a[Math.floor(Math.random() * a.length)];
+  const gen = () => {
+    const rows = [];
+    for (let i = 0; i < 5; i++) {
+      const f = pick(first), l = pick(last);
+      if (sel.value === "Names") rows.push(f + " " + l);
+      else if (sel.value === "Emails") rows.push((f + "." + l + "@" + pick(domains)).toLowerCase());
+      else if (sel.value === "Phones") rows.push("(416) 555-" + (1000 + Math.floor(Math.random() * 9000)));
+      else if (sel.value === "Passwords") rows.push(Array.from({ length: 12}, () => chars[Math.floor(Math.random() * chars.length)]).join(""));
+      else rows.push([8, 4, 4, 4, 12].map(n => Array.from({ length: n}, () => Math.floor(Math.random() * 16).toString(16)).join("")).join("-"));
+}
+    out.innerHTML = rows.map(r => `<div>&#9656; ${r}</div>`).join("") +
+      `<p style="color:var(--muted);font-size:.8rem;margin-top:6px">Simplified demo — the full Python CLI has 8 generators, address and lorem banks, complete user records, and a --seed flag.</p>`;
+};
+  btn.onclick = gen;
+  box.append(el("label", "Pick a data type — five fresh rows on every click"), sel, btn, out);
+  gen();
+},
+
+/* --- Day 23: kanban board (simplified) --- */
+kanban(box) {
+  const cols = ["To Do", "In Progress", "Done"];
+  const state = {
+    "To Do": ["Ship Day 23 kanban demo", "Write README"],
+    "In Progress": ["Wire up drag & drop"],
+    "Done": ["Build fake-data-generator"]
+};
+  let dragText = null, dragFrom = null;
+  const wrap = el("div", "");
+  wrap.style.cssText = "display:flex;gap:8px;flex-wrap:wrap";
+  const render = () => {
+    wrap.innerHTML = "";
+    cols.forEach(c => {
+      const col = el("div", "");
+      col.style.cssText = "flex:1;min-width:130px;background:#141414;border:1px solid #2a2a2a;border-radius:10px;padding:8px";
+      const head = el("div", c + " (" + state[c].length + ")");
+      head.style.cssText = "font-weight:700;color:var(--gold);margin-bottom:8px;font-size:.9rem";
+      col.append(head);
+      state[c].forEach(t => {
+        const card = el("div", t);
+        card.draggable = true;
+        card.style.cssText = "background:#1e1e1e;border:1px solid #333;border-radius:8px;padding:8px;margin-bottom:6px;cursor:grab;font-size:.86rem";
+        card.ondragstart = () => { dragText = t; dragFrom = c;};
+        col.append(card);
+});
+      col.ondragover = e => { e.preventDefault(); col.style.borderColor = "var(--gold)";};
+      col.ondragleave = () => { col.style.borderColor = "#2a2a2a";};
+      col.ondrop = e => {
+        e.preventDefault(); col.style.borderColor = "#2a2a2a";
+        if (dragText!= null && dragFrom) {
+          const i = state[dragFrom].indexOf(dragText);
+          if (i > -1) state[dragFrom].splice(i, 1);
+          state[c].push(dragText);
+          render();
+}
+};
+      const add = el("input"); add.placeholder = "+ Add card"; add.className = "din";
+      add.style.cssText = "width:100%;margin-top:4px;box-sizing:border-box";
+      add.onkeydown = e => { if (e.key === "Enter" && add.value.trim()) { state[c].push(add.value.trim()); render();}};
+      col.append(add);
+      wrap.append(col);
+});
+};
+  render();
+  box.append(el("p", "Drag cards between columns — the real repo auto-saves every move to localStorage."), wrap);
 }
 };
 
@@ -1605,7 +1685,7 @@ function buildChips(container, items, active, label) {
   });
 }
 const allTech = [...new Set(PROJECTS.flatMap(p => p.tech))].sort();
-const dayOrder = ["Day 22","Day 21","Day 20","Day 19","Day 18","Day 17","Day 16","Day 15","Day 14","Day 13","Day 12","Day 11","Day 10","Day 9","Day 8","Day 7","Day 6","Day 5","Day 4","Day 3","Day 2","Day 1","Bonus"];
+const dayOrder = ["Day 23","Day 22","Day 21","Day 20","Day 19","Day 18","Day 17","Day 16","Day 15","Day 14","Day 13","Day 12","Day 11","Day 10","Day 9","Day 8","Day 7","Day 6","Day 5","Day 4","Day 3","Day 2","Day 1","Bonus"];
 const allDays = [...new Set(PROJECTS.map(p => p.day))].sort((a, b) => dayOrder.indexOf(a) - dayOrder.indexOf(b));
 buildChips(techChips, allTech, activeTech, "Filter by tech");
 buildChips(dayChips, allDays, activeDay, "Filter by day");
